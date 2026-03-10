@@ -4,7 +4,6 @@ IterLife 公共部署栈目录（阿里云单机）。
 
 包含内容：
 - `webhook/iterlife-deploy-webhook-server.py`：统一部署回调服务
-- `docker-compose.yml`：历史兼容编排（仅保留作手动应急，不是主链路）
 - `systemd/`：systemd 服务与 drop-in 备份
 - `docs/`：运维说明
 
