@@ -133,7 +133,7 @@ sudo systemctl status iterlife-app-deploy-webhook.service
 `DEPLOY_TARGETS_JSON` 标准示例：
 
 ```env
-DEPLOY_TARGETS_JSON={"iterlife-reunion":{"deploy_script":"/apps/iterlife-reunion/deploy-reunion-from-ghcr.sh","image_env":"API_IMAGE_REF"},"iterlife-reunion-ui":{"deploy_script":"/apps/iterlife-reunion/deploy-reunion-ui-from-ghcr.sh","image_env":"UI_IMAGE_REF"},"iterlife-expenses":{"deploy_script":"/apps/iterlife-expenses/deploy-expenses-api-from-ghcr.sh","image_env":"API_IMAGE_REF"},"iterlife-expenses-ui":{"deploy_script":"/apps/iterlife-expenses/deploy-expenses-ui-from-ghcr.sh","image_env":"UI_IMAGE_REF"}}
+DEPLOY_TARGETS_JSON={"iterlife-reunion":{"deploy_script":"/apps/iterlife-reunion/deploy/scripts/deploy-reunion-from-ghcr.sh","image_env":"API_IMAGE_REF"},"iterlife-reunion-ui":{"deploy_script":"/apps/iterlife-reunion-ui/deploy/scripts/deploy-reunion-ui-from-ghcr.sh","image_env":"UI_IMAGE_REF"},"iterlife-expenses":{"deploy_script":"/apps/iterlife-expenses/deploy-expenses-api-from-ghcr.sh","image_env":"API_IMAGE_REF"},"iterlife-expenses-ui":{"deploy_script":"/apps/iterlife-expenses/deploy-expenses-ui-from-ghcr.sh","image_env":"UI_IMAGE_REF"}}
 ```
 
 ## 6. 治理检查清单

@@ -4,6 +4,7 @@ IterLife 公共部署栈目录（阿里云单机）。
 
 包含内容：
 - `webhook/iterlife-deploy-webhook-server.py`：统一部署回调服务
+- `scripts/deploy-all-apps-from-github.sh`：跨应用源码部署入口
 - `systemd/`：systemd 服务与 drop-in 备份
 - `docs/`：运维说明
 
