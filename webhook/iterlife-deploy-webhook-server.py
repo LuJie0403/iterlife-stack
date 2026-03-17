@@ -34,7 +34,10 @@ WEBHOOK_PATH = os.getenv("WEBHOOK_PATH", "/hooks/app-deploy")
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "")
 DEPLOY_TIMEOUT_SECONDS = int(os.getenv("DEPLOY_TIMEOUT_SECONDS", "1800"))
 LOG_FILE = os.getenv("WEBHOOK_LOG_FILE", "/apps/logs/webhook/iterlife-deploy-webhook.log")
-LEGACY_DEPLOY_SCRIPT = os.getenv("DEPLOY_SCRIPT", "/apps/iterlife-reunion/deploy-reunion-from-ghcr.sh")
+LEGACY_DEPLOY_SCRIPT = os.getenv(
+    "DEPLOY_SCRIPT",
+    "/apps/iterlife-reunion/deploy/scripts/deploy-reunion-from-ghcr.sh",
+)
 DEPLOY_TARGETS_JSON = os.getenv("DEPLOY_TARGETS_JSON", "")
 
 
