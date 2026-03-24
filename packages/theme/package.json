@@ -1,6 +1,6 @@
 {
   "name": "@lujie0403/iterlife-theme-starfield",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Shared IterLife frontend theme assets",
   "type": "module",
   "sideEffects": [
