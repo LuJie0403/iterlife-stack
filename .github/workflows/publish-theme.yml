@@ -33,4 +33,4 @@ jobs:
       - name: Publish theme package
         run: pnpm --filter @lujie0403/iterlife-theme-starfield publish --no-git-checks
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_PUBLISH_TOKEN || secrets.GITHUB_TOKEN }}
