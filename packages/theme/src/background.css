@@ -1,0 +1,120 @@
+/* Shared background theme source of truth.
+   Consumed by IterLife frontends through @lujie0403/iterlife-theme-starfield/background.css */
+body {
+  background-color: #000000;
+  background-image:
+    radial-gradient(
+      1200px 620px at 50% -28%,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.03) 30%,
+      transparent 66%
+    ),
+    radial-gradient(
+      900px 460px at 50% 120%,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.015) 34%,
+      transparent 74%
+    ),
+    radial-gradient(
+      circle at 11% 16%,
+      rgba(252, 252, 255, 0.95) 0 0.75px,
+      transparent 1.05px
+    ),
+    radial-gradient(
+      circle at 22% 44%,
+      rgba(234, 237, 245, 0.65) 0 0.72px,
+      transparent 1.04px
+    ),
+    radial-gradient(
+      circle at 36% 29%,
+      rgba(250, 252, 255, 0.72) 0 0.85px,
+      transparent 1.12px
+    ),
+    radial-gradient(
+      circle at 54% 14%,
+      rgba(233, 239, 255, 0.76) 0 0.82px,
+      transparent 1.15px
+    ),
+    radial-gradient(
+      circle at 67% 38%,
+      rgba(220, 230, 250, 0.58) 0 0.74px,
+      transparent 1.05px
+    ),
+    radial-gradient(
+      circle at 82% 22%,
+      rgba(247, 251, 255, 0.86) 0 0.78px,
+      transparent 1.1px
+    ),
+    radial-gradient(
+      circle at 91% 52%,
+      rgba(222, 234, 255, 0.6) 0 0.72px,
+      transparent 1.06px
+    ),
+    radial-gradient(
+      circle at 16% 72%,
+      rgba(233, 243, 255, 0.7) 0 0.82px,
+      transparent 1.12px
+    ),
+    radial-gradient(
+      circle at 43% 66%,
+      rgba(219, 231, 249, 0.62) 0 0.76px,
+      transparent 1.08px
+    ),
+    radial-gradient(
+      circle at 61% 82%,
+      rgba(247, 251, 255, 0.82) 0 0.84px,
+      transparent 1.16px
+    ),
+    radial-gradient(
+      circle at 79% 73%,
+      rgba(223, 236, 255, 0.62) 0 0.78px,
+      transparent 1.08px
+    ),
+    radial-gradient(
+      circle at 93% 88%,
+      rgba(243, 247, 255, 0.72) 0 0.8px,
+      transparent 1.13px
+    ),
+    radial-gradient(
+      180% 120% at 50% 45%,
+      transparent 26%,
+      rgba(0, 0, 0, 0.72) 76%,
+      rgba(0, 0, 0, 0.96) 100%
+    ),
+    linear-gradient(180deg, #000000 0%, #000000 100%);
+  background-size:
+    auto,
+    auto,
+    240px 240px,
+    270px 270px,
+    300px 300px,
+    320px 320px,
+    350px 350px,
+    380px 380px,
+    410px 410px,
+    450px 450px,
+    500px 500px,
+    560px 560px,
+    620px 620px,
+    700px 700px,
+    100% 100%,
+    100% 100%;
+  background-position:
+    center top,
+    center bottom,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    center center,
+    center center;
+  background-attachment: fixed;
+}

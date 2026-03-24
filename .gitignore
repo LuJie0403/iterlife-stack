@@ -12,3 +12,6 @@ __pycache__/
 
 # system/mac noise
 .DS_Store
+
+# frontend package workspace
+node_modules/
