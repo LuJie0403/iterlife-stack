@@ -1,6 +1,6 @@
 {
   "name": "@lujie0403/iterlife-theme-starfield",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Shared IterLife frontend theme assets",
   "type": "module",
   "sideEffects": [
@@ -8,7 +8,8 @@
   ],
   "files": [
     "src",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "exports": {
     ".": "./src/index.ts",
@@ -23,5 +24,5 @@
     "url": "git+https://github.com/LuJie0403/iterlife-reunion-stack.git",
     "directory": "packages/theme"
   },
-  "license": "UNLICENSED"
+  "license": "SEE LICENSE IN LICENSE"
 }
