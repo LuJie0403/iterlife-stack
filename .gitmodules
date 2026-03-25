@@ -1,3 +1,3 @@
 [submodule ".codex/meta"]
 	path = .codex/meta
-	url = /Users/iter_1024/repository/codex-agent-meta
+	url = git@github.com:LuJie0403/codex-agent-meta.git
