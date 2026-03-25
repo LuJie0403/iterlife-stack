@@ -1,0 +1,3 @@
+[submodule ".codex/meta"]
+	path = .codex/meta
+	url = /Users/iter_1024/repository/codex-agent-meta
