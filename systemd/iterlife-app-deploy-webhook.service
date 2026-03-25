@@ -12,8 +12,8 @@ EnvironmentFile=/apps/config/iterlife-reunion-stack/iterlife-deploy-webhook.env
 ExecStart=/usr/bin/python3 /apps/iterlife-reunion-stack/webhook/iterlife-deploy-webhook-server.py
 Restart=always
 RestartSec=3
-StandardOutput=append:/apps/logs/webhook/iterlife-deploy-webhook.log
-StandardError=append:/apps/logs/webhook/iterlife-deploy-webhook.log
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target

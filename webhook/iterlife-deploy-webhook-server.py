@@ -15,6 +15,7 @@ import time
 from datetime import datetime, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler
+from pathlib import Path
 try:
     # Python 3.7+
     from http.server import ThreadingHTTPServer  # type: ignore
@@ -25,7 +26,7 @@ except ImportError:
 
     class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
         daemon_threads = True
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 
 BIND_HOST = os.getenv("WEBHOOK_BIND_HOST", "127.0.0.1")
@@ -33,7 +34,19 @@ BIND_PORT = int(os.getenv("WEBHOOK_BIND_PORT", "19091"))
 WEBHOOK_PATH = os.getenv("WEBHOOK_PATH", "/hooks/app-deploy")
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "")
 DEPLOY_TIMEOUT_SECONDS = int(os.getenv("DEPLOY_TIMEOUT_SECONDS", "1800"))
-LOG_FILE = os.getenv("WEBHOOK_LOG_FILE", "/apps/logs/webhook/iterlife-deploy-webhook.log")
+LEGACY_LOG_FILE = os.getenv("WEBHOOK_LOG_FILE", "").strip()
+LOG_DIR = Path(
+    os.getenv(
+        "WEBHOOK_LOG_DIR",
+        Path(LEGACY_LOG_FILE).parent.as_posix()
+        if LEGACY_LOG_FILE
+        else "/apps/logs/webhook",
+    )
+)
+LOG_FILE_PREFIX = os.getenv(
+    "WEBHOOK_LOG_FILE_PREFIX",
+    Path(LEGACY_LOG_FILE).stem if LEGACY_LOG_FILE else "iterlife-deploy-webhook",
+).strip() or "iterlife-deploy-webhook"
 LEGACY_DEPLOY_SCRIPT = os.getenv(
     "DEPLOY_SCRIPT",
     "/apps/iterlife-reunion/deploy/scripts/deploy-reunion-from-ghcr.sh",
@@ -87,10 +100,27 @@ SERVICE_STATE_LOCK = threading.Lock()
 SERVICE_STATE = {}  # type: Dict[str, Dict[str, object]]
 
 
+def resolve_log_file_path(now: Optional[datetime] = None) -> Path:
+    current = now or datetime.now().astimezone()
+    return LOG_DIR / f"{LOG_FILE_PREFIX}-{current.strftime('%Y-%m-%d')}.log"
+
+
+def ensure_log_destination(now: Optional[datetime] = None) -> Path:
+    log_file = resolve_log_file_path(now)
+    log_file.parent.mkdir(mode=0o2775, parents=True, exist_ok=True)
+    if not log_file.exists():
+        log_file.touch(mode=0o664)
+    else:
+        os.chmod(log_file, 0o664)
+    return log_file
+
+
 def write_log(message: str) -> None:
-    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    current = datetime.now().astimezone()
+    timestamp = current.isoformat(timespec="seconds")
     line = f"{timestamp} {message}\n"
-    with open(LOG_FILE, "a", encoding="utf-8") as fp:
+    log_file = ensure_log_destination(current)
+    with open(log_file, "a", encoding="utf-8") as fp:
         fp.write(line)
 
 
@@ -340,6 +370,7 @@ class DeployWebhookHandler(BaseHTTPRequestHandler):
 def main() -> None:
     if not WEBHOOK_SECRET:
         raise SystemExit("WEBHOOK_SECRET is required")
+    startup_log_file = ensure_log_destination()
     for service_name, target in DEPLOY_TARGETS.items():
         script = target["deploy_script"]
         if not os.path.exists(script):
@@ -350,7 +381,8 @@ def main() -> None:
     httpd = ThreadingHTTPServer((BIND_HOST, BIND_PORT), DeployWebhookHandler)
     services = ",".join(sorted(DEPLOY_TARGETS.keys()))
     write_log(
-        f"start webhook server at http://{BIND_HOST}:{BIND_PORT}{WEBHOOK_PATH} services={services}"
+        "start webhook server at http://%s:%s%s services=%s log_file=%s"
+        % (BIND_HOST, BIND_PORT, WEBHOOK_PATH, services, startup_log_file)
     )
     httpd.serve_forever()
 
