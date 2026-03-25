@@ -69,6 +69,65 @@ wait_for_http_ok() {
   return 1
 }
 
+parse_image_metadata() {
+  local image_ref="$1"
+  local image_without_digest="${image_ref%%@*}"
+  local image_path="$image_without_digest"
+  local image_tag=""
+
+  if [[ "$image_without_digest" == *:* ]]; then
+    image_tag="${image_without_digest##*:}"
+    image_path="${image_without_digest%:*}"
+  fi
+
+  local path_after_registry="$image_path"
+  if [[ "$image_path" == */* ]]; then
+    path_after_registry="${image_path#*/}"
+  fi
+
+  local image_owner=""
+  local image_name="$path_after_registry"
+  if [[ "$path_after_registry" == */* ]]; then
+    image_owner="${path_after_registry%%/*}"
+    image_name="${path_after_registry##*/}"
+  fi
+
+  RELEASE_IMAGE_PATH="$image_path"
+  RELEASE_IMAGE_TAG="$image_tag"
+  RELEASE_IMAGE_OWNER="$image_owner"
+  RELEASE_IMAGE_NAME="$image_name"
+}
+
+print_container_details() {
+  local container_id="$1"
+  local container_running_for
+  local inspect_output
+
+  container_running_for="$(docker ps --filter "id=${container_id}" --format '{{.RunningFor}}' | head -n 1)"
+  inspect_output="$(
+    docker inspect --format '{{.Id}}|{{.Name}}|{{.Config.Image}}|{{.Image}}|{{.Created}}|{{.State.Status}}|{{.State.StartedAt}}|{{index .Config.Labels "com.docker.compose.project"}}|{{index .Config.Labels "com.docker.compose.service"}}' \
+      "$container_id"
+  )"
+
+  IFS='|' read -r inspected_id inspected_name configured_image image_id created_at status started_at compose_project compose_service <<<"$inspect_output"
+  inspected_name="${inspected_name#/}"
+
+  echo "release_registry=${GHCR_REGISTRY}"
+  echo "release_owner=${RELEASE_IMAGE_OWNER}"
+  echo "release_image_name=${RELEASE_IMAGE_NAME}"
+  echo "release_image_tag=${RELEASE_IMAGE_TAG}"
+  echo "container_id=${inspected_id}"
+  echo "container_name=${inspected_name}"
+  echo "container_configured_image=${configured_image}"
+  echo "container_image_id=${image_id}"
+  echo "container_created_at=${created_at}"
+  echo "container_started_at=${started_at}"
+  echo "container_running_for=${container_running_for}"
+  echo "container_status=${status}"
+  echo "compose_project=${compose_project}"
+  echo "compose_service=${compose_service}"
+}
+
 require_cmd docker
 require_cmd curl
 require_cmd python3
@@ -77,6 +136,7 @@ require_cmd timeout
 check_file "$DEPLOY_TARGETS_FILE"
 [ -n "$DEPLOY_TARGET_SERVICE" ] || die "DEPLOY_TARGET_SERVICE is required"
 [ -n "$RELEASE_IMAGE_REF" ] || die "RELEASE_IMAGE_REF is required"
+parse_image_metadata "$RELEASE_IMAGE_REF"
 
 eval "$(
   python3 - "$DEPLOY_TARGETS_FILE" "$DEPLOY_TARGET_SERVICE" <<'PY'
@@ -176,8 +236,12 @@ if ! wait_for_http_ok "$TARGET_HEALTHCHECK_URL" "$HEALTH_RETRIES_DEFAULT" "$HEAL
   die "Health check failed: ${TARGET_HEALTHCHECK_URL}"
 fi
 
+container_id="$(docker compose --project-directory "$TARGET_COMPOSE_PROJECT_DIRECTORY" -f "$TARGET_COMPOSE_FILE" ps -q "$TARGET_COMPOSE_SERVICE" | head -n 1)"
+[ -n "$container_id" ] || die "Unable to resolve container id for ${TARGET_COMPOSE_SERVICE}"
+
 log "Deployment completed for ${DEPLOY_TARGET_SERVICE}"
 echo "service=${DEPLOY_TARGET_SERVICE}"
 echo "image_ref=${RELEASE_IMAGE_REF}"
 echo "local_image_name=${TARGET_LOCAL_IMAGE_NAME}"
 echo "healthcheck_url=${TARGET_HEALTHCHECK_URL}"
+print_container_details "$container_id"
