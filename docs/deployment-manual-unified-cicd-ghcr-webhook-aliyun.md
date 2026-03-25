@@ -162,7 +162,7 @@ IterLife 生产发布只保留一条标准链路：
     "compose_service": "iterlife-reunion-api",
     "release_image_env": "API_IMAGE_REF",
     "local_image_env": "LOCAL_API_IMAGE_NAME",
-    "local_image_name": "iterlife-reunion-iterlife-reunion-api:latest",
+    "local_image_name": "iterlife-reunion-api:local",
     "healthcheck_url": "http://127.0.0.1:18080/api/health",
     "compose_no_deps": false
   },
@@ -173,7 +173,7 @@ IterLife 生产发布只保留一条标准链路：
     "compose_service": "iterlife-reunion-ui",
     "release_image_env": "UI_IMAGE_REF",
     "local_image_env": "LOCAL_UI_IMAGE_NAME",
-    "local_image_name": "iterlife-reunion-iterlife-reunion-ui:latest",
+    "local_image_name": "iterlife-reunion-ui:local",
     "healthcheck_url": "http://127.0.0.1:13080",
     "compose_no_deps": true
   }
