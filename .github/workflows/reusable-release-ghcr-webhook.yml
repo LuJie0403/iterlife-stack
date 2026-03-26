@@ -26,11 +26,6 @@ on:
         required: false
         default: ""
         type: string
-      use_node_auth_token:
-        description: Whether to inject NODE_AUTH_TOKEN into docker build args
-        required: false
-        default: false
-        type: boolean
       concurrency_group:
         description: Workflow concurrency group
         required: true
@@ -45,8 +40,6 @@ on:
         required: true
       ALIYUN_DEPLOY_WEBHOOK_SECRET:
         required: true
-      GH_PACKAGES_PUBLISH_TOKEN:
-        required: false
 
 permissions:
   contents: read
@@ -86,22 +79,11 @@ jobs:
         id: build_args
         env:
           INPUT_BUILD_ARGS: ${{ inputs.build_args }}
-          USE_NODE_AUTH_TOKEN: ${{ inputs.use_node_auth_token }}
-          GH_PACKAGES_PUBLISH_TOKEN: ${{ secrets.GH_PACKAGES_PUBLISH_TOKEN }}
-          GH_FALLBACK_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           {
             echo 'value<<EOF'
             if [ -n "$INPUT_BUILD_ARGS" ]; then
               printf '%s\n' "$INPUT_BUILD_ARGS"
-            fi
-
-            if [ "$USE_NODE_AUTH_TOKEN" = "true" ]; then
-              token="$GH_PACKAGES_PUBLISH_TOKEN"
-              if [ -z "$token" ]; then
-                token="$GH_FALLBACK_TOKEN"
-              fi
-              printf 'NODE_AUTH_TOKEN=%s\n' "$token"
             fi
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
