@@ -86,10 +86,10 @@
 
 ### 6.1 文档边界
 
-- `directory-governance.md` 负责目录结构与治理规则。
-- `deployment-operations.md` 负责部署与运维事实。
-- `frontend-theme-package.md` 负责共享主题包事实。
-- `github-actions-secrets.md` 负责 secrets 事实。
+- `repository-directory-governance.md` 负责目录结构与治理规则。
+- `unified-deployment-and-operations.md` 负责部署与运维事实。
+- `dark-universe-theme-package.md` 负责共享主题包事实。
+- `github-actions-secrets-inventory.md` 负责 secrets 事实。
 
 ### 6.2 文档写作规则
 
@@ -101,9 +101,9 @@
 ### 6.3 文档更新触发器
 
 - 调整目录边界或新增目录时，更新本文件。
-- 调整部署流程、服务矩阵、运维命令时，更新 `deployment-operations.md`。
-- 调整共享主题包目录、发布方式、消费方式时，更新 `frontend-theme-package.md`。
-- 调整 workflow secrets 时，更新 `github-actions-secrets.md`。
+- 调整部署流程、服务矩阵、运维命令时，更新 `unified-deployment-and-operations.md`。
+- 调整共享主题包目录、发布方式、消费方式时，更新 `dark-universe-theme-package.md`。
+- 调整 workflow secrets 时，更新 `github-actions-secrets-inventory.md`。
 
 ## 7. 持续治理计划
 

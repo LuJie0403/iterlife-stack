@@ -24,12 +24,6 @@
 5. webhook 按 `service` 命中 `config/deploy-targets.json`。
 6. `scripts/deploy-service-from-ghcr.sh` 执行镜像拉取、打标、`docker compose up -d` 和健康检查。
 
-当前不采用以下旁路：
-
-- 服务器 `git pull` 后源码构建发布。
-- 手工触发生产 release workflow。
-- 业务仓库自带的生产部署 shell。
-
 ## 3. 仓库职责边界
 
 ### 3.1 控制面仓库
@@ -97,7 +91,7 @@
 
 ## 8. GitHub Actions 与 Secrets
 
-Secrets 事实清单见 [github-actions-secrets.md](./github-actions-secrets.md)。
+Secrets 事实清单见 [github-actions-secrets-inventory.md](./github-actions-secrets-inventory.md)。
 
 当前链路中：
 
@@ -289,6 +283,6 @@ payload='{
 - `scripts/deploy-service-from-ghcr.sh`
 - `webhook/iterlife-deploy-webhook-server.py`
 - `.github/workflows/reusable-release-ghcr-webhook.yml`
-- [github-actions-secrets.md](./github-actions-secrets.md)
+- [github-actions-secrets-inventory.md](./github-actions-secrets-inventory.md)
 
-如有目录边界变化，再同步更新 [directory-governance.md](./directory-governance.md)。
+如有目录边界变化，再同步更新 [repository-directory-governance.md](./repository-directory-governance.md)。

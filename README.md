@@ -24,11 +24,32 @@ webhook/              webhook 服务源码与示例 env
 
 ## 文档入口
 
-- [docs/README.md](./docs/README.md)
-- [docs/directory-governance.md](./docs/directory-governance.md)
-- [docs/deployment-operations.md](./docs/deployment-operations.md)
-- [docs/frontend-theme-package.md](./docs/frontend-theme-package.md)
-- [docs/github-actions-secrets.md](./docs/github-actions-secrets.md)
+- [docs/repository-directory-governance.md](./docs/repository-directory-governance.md)
+- [docs/unified-deployment-and-operations.md](./docs/unified-deployment-and-operations.md)
+- [docs/dark-universe-theme-package.md](./docs/dark-universe-theme-package.md)
+- [docs/github-actions-secrets-inventory.md](./docs/github-actions-secrets-inventory.md)
+
+`/docs` 只承载当前仍然有效的治理规则、运维基线和共享资产说明，不记录已经下线的迁移过程，也不重复业务仓库自己的 README。
+
+- [docs/repository-directory-governance.md](./docs/repository-directory-governance.md)：仓库顶层目录、目录边界、准入规则和持续治理计划。
+- [docs/unified-deployment-and-operations.md](./docs/unified-deployment-and-operations.md)：统一 GHCR + webhook 部署链路、服务器初始化、发布检查、回滚与排障。
+- [docs/dark-universe-theme-package.md](./docs/dark-universe-theme-package.md)：`@iterlife/theme-dark-universe` 的目录、边界、发布和消费方式。
+- [docs/github-actions-secrets-inventory.md](./docs/github-actions-secrets-inventory.md)：当前 GitHub Actions secrets 的使用归属、作用范围和维护规则。
+
+## 文档治理规则
+
+- 文件名统一使用英文 `kebab-case`。
+- 主标题和正文优先使用中文，直接描述当前状态和当前规则。
+- 同一主题只保留一个事实源；如果某条规则已经写入专门文档，其它地方只链接，不重复抄写。
+- `/docs` 只保留稳定资料；排查笔记、临时方案、迁移草稿不进入该目录。
+- 涉及部署链路、共享包发布链路或目录结构的变更时，必须同步更新对应文档。
+
+## 文档更新入口
+
+- 调整顶层目录、目录职责或文档分层时，更新 [docs/repository-directory-governance.md](./docs/repository-directory-governance.md)。
+- 调整 webhook、systemd、部署脚本、部署目标注册表或发布流程时，更新 [docs/unified-deployment-and-operations.md](./docs/unified-deployment-and-operations.md)。
+- 调整 `packages/themes/dark-universe` 的目录、发布方式或接入方式时，更新 [docs/dark-universe-theme-package.md](./docs/dark-universe-theme-package.md)。
+- 调整 workflow secret、仓库 secret 或发布凭证时，更新 [docs/github-actions-secrets-inventory.md](./docs/github-actions-secrets-inventory.md)。
 
 ## 运行约束
 

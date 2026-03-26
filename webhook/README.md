@@ -18,4 +18,4 @@
 - 真实运行时配置不放回仓库。
 - Python 服务启动时会确保日志目录和当天日志文件存在。
 - `systemd` 的 stdout / stderr 进入 `journalctl`，部署和 HTTP 事件写入按天切分的 webhook 日志文件。
-- 完整部署和运维说明见 [`docs/deployment-operations.md`](../docs/deployment-operations.md)。
+- 完整部署和运维说明见 [`docs/unified-deployment-and-operations.md`](../docs/unified-deployment-and-operations.md)。

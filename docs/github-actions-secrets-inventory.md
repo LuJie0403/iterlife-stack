@@ -57,4 +57,4 @@
 - workflow 新增 secret 时，先修改 workflow，再更新本文档，再到 GitHub 仓库设置页补齐。
 - 若某个 secret 只属于业务仓库，不应误写成 `iterlife-reunion-stack` 的自有 secret。
 - 若某个 secret 已经不再被 workflow 使用，应在移除 workflow 依赖后同步从本文档删掉。
-- 变更发布链路时，同时检查 [deployment-operations.md](./deployment-operations.md)。
+- 变更发布链路时，同时检查 [unified-deployment-and-operations.md](./unified-deployment-and-operations.md)。

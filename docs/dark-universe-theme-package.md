@@ -113,7 +113,7 @@ npm run build
 
 - `GH_NPM_PACKAGES_PUBLISH_ACTION_TOKEN`
 
-更完整说明见 [github-actions-secrets.md](./github-actions-secrets.md)。
+更完整说明见 [github-actions-secrets-inventory.md](./github-actions-secrets-inventory.md)。
 
 ## 6. 目录治理规则
 
