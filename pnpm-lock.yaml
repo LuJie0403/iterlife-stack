@@ -7,5 +7,3 @@ settings:
 importers:
 
   .: {}
-
-  packages/theme: {}

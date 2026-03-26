@@ -1,8 +1,5 @@
 {
   "name": "iterlife-reunion-stack",
   "private": true,
-  "packageManager": "pnpm@10.8.0",
-  "scripts": {
-    "theme:publish": "pnpm --filter @lujie0403/iterlife-theme-starfield publish --no-git-checks"
-  }
+  "packageManager": "pnpm@10.8.0"
 }
