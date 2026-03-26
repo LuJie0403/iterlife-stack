@@ -45,7 +45,7 @@ on:
         required: true
       ALIYUN_DEPLOY_WEBHOOK_SECRET:
         required: true
-      GH_PACKAGES_READ_TOKEN:
+      GH_PACKAGES_PUBLISH_TOKEN:
         required: false
 
 permissions:
@@ -87,7 +87,7 @@ jobs:
         env:
           INPUT_BUILD_ARGS: ${{ inputs.build_args }}
           USE_NODE_AUTH_TOKEN: ${{ inputs.use_node_auth_token }}
-          GH_PACKAGES_READ_TOKEN: ${{ secrets.GH_PACKAGES_READ_TOKEN }}
+          GH_PACKAGES_PUBLISH_TOKEN: ${{ secrets.GH_PACKAGES_PUBLISH_TOKEN }}
           GH_FALLBACK_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           {
@@ -97,7 +97,7 @@ jobs:
             fi
 
             if [ "$USE_NODE_AUTH_TOKEN" = "true" ]; then
-              token="$GH_PACKAGES_READ_TOKEN"
+              token="$GH_PACKAGES_PUBLISH_TOKEN"
               if [ -z "$token" ]; then
                 token="$GH_FALLBACK_TOKEN"
               fi
