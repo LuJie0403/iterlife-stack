@@ -82,32 +82,38 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push image
-        if: ${{ !inputs.use_node_auth_token }}
-        id: build
-        uses: docker/build-push-action@v6
-        with:
-          context: ${{ inputs.docker_context }}
-          file: ${{ inputs.dockerfile }}
-          push: true
-          build-args: ${{ inputs.build_args }}
-          tags: |
-            ghcr.io/${{ steps.vars.outputs.owner_lc }}/${{ inputs.image_name }}:main-latest
-            ghcr.io/${{ steps.vars.outputs.owner_lc }}/${{ inputs.image_name }}:sha-${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: Prepare build args
+        id: build_args
+        env:
+          INPUT_BUILD_ARGS: ${{ inputs.build_args }}
+          USE_NODE_AUTH_TOKEN: ${{ inputs.use_node_auth_token }}
+          GH_PACKAGES_READ_TOKEN: ${{ secrets.GH_PACKAGES_READ_TOKEN }}
+          GH_FALLBACK_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo 'value<<EOF'
+            if [ -n "$INPUT_BUILD_ARGS" ]; then
+              printf '%s\n' "$INPUT_BUILD_ARGS"
+            fi
 
-      - name: Build and push image with package token
-        if: ${{ inputs.use_node_auth_token }}
+            if [ "$USE_NODE_AUTH_TOKEN" = "true" ]; then
+              token="$GH_PACKAGES_READ_TOKEN"
+              if [ -z "$token" ]; then
+                token="$GH_FALLBACK_TOKEN"
+              fi
+              printf 'NODE_AUTH_TOKEN=%s\n' "$token"
+            fi
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build and push image
         id: build
         uses: docker/build-push-action@v6
         with:
           context: ${{ inputs.docker_context }}
           file: ${{ inputs.dockerfile }}
           push: true
-          build-args: |
-            ${{ inputs.build_args }}
-            NODE_AUTH_TOKEN=${{ secrets.GH_PACKAGES_READ_TOKEN != '' && secrets.GH_PACKAGES_READ_TOKEN || secrets.GITHUB_TOKEN }}
+          build-args: ${{ steps.build_args.outputs.value }}
           tags: |
             ghcr.io/${{ steps.vars.outputs.owner_lc }}/${{ inputs.image_name }}:main-latest
             ghcr.io/${{ steps.vars.outputs.owner_lc }}/${{ inputs.image_name }}:sha-${{ github.sha }}
