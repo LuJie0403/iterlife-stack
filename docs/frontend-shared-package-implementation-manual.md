@@ -349,7 +349,7 @@ npm publish --access public
 
 建议在 GitHub 仓库中配置：
 
-1. `NPM_TOKEN`
+1. `GH_NPM_PACKAGES_PUBLISH_ACTION_TOKEN`
 
 该 token 需具备向 `@iterlife` scope 发布包的权限，并与 npm 组织的 2FA 策略兼容。
 
@@ -512,7 +512,7 @@ pnpm add @iterlife/theme-dark-universe
 7. `npm pack --dry-run` 已通过，用于确认最终发布内容
 8. `iterlife-reunion-ui` 已通过本地 `file:` 依赖完成构建验证
 9. `iterlife-expenses-ui` 已通过本地 `file:` 依赖完成构建验证
-10. GitHub 仓库 `NPM_TOKEN` 已配置
+10. GitHub 仓库 `GH_NPM_PACKAGES_PUBLISH_ACTION_TOKEN` 已配置
 11. 发布 tag 命名已确认采用 `theme-dark-universe-v*`
 12. 发布后消费者从 `file:` 依赖切回正式版本的步骤已准备完成
 
