@@ -207,6 +207,8 @@ IterLife 生产发布只保留一条标准链路：
 - webhook 签名和回调
 - 生产环境 secrets 校验
 
+相关 GitHub Actions secrets 清单见 `docs/github-actions-secrets-reference.md`。
+
 ## 8. 治理约束
 
 - `main` 只允许通过 PR 合并

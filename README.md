@@ -13,6 +13,7 @@ CI/CD 角色定位：
 - 业务仓库是独立可部署单元，不再承担跨应用部署控制职责
 - 生产发布标准流程见 `docs/deployment-manual-unified-cicd-ghcr-webhook-aliyun.md`
 - 标准化清理与迁移蓝图见 `docs/cicd-standardization-blueprint.md`
+- GitHub Actions secrets 清单见 `docs/github-actions-secrets-reference.md`
 
 安全约束：
 - 真实配置文件 `/apps/config/iterlife-reunion-stack/iterlife-deploy-webhook.env` 不入库
