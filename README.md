@@ -28,6 +28,7 @@ webhook/              webhook 服务源码与示例 env
 - [docs/unified-deployment-and-operations.md](./docs/unified-deployment-and-operations.md)
 - [docs/dark-universe-theme-package.md](./docs/dark-universe-theme-package.md)
 - [docs/github-actions-secrets-inventory.md](./docs/github-actions-secrets-inventory.md)
+- [docs/server-governance-audit-20260323.md](./docs/server-governance-audit-20260323.md)
 
 `/docs` 只承载当前仍然有效的治理规则、运维基线和共享资产说明，不记录已经下线的迁移过程，也不重复业务仓库自己的 README。
 
@@ -35,6 +36,7 @@ webhook/              webhook 服务源码与示例 env
 - [docs/unified-deployment-and-operations.md](./docs/unified-deployment-and-operations.md)：统一 GHCR + webhook 部署链路、服务器初始化、发布检查、回滚与排障。
 - [docs/dark-universe-theme-package.md](./docs/dark-universe-theme-package.md)：`@iterlife/theme-dark-universe` 的目录、边界、发布和消费方式。
 - [docs/github-actions-secrets-inventory.md](./docs/github-actions-secrets-inventory.md)：当前 GitHub Actions secrets 的使用归属、作用范围和维护规则。
+- [docs/server-governance-audit-20260323.md](./docs/server-governance-audit-20260323.md)：阿里云生产服务器治理收官摘要、当前状态、待定项与维护建议。
 
 ## 文档治理规则
 
