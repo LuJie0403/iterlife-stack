@@ -1,6 +1,6 @@
 {
   "name": "@iterlife/vue-copy-action",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "IterLife shared Vue copy action button with unified copied-state feedback.",
   "license": "Apache-2.0",
   "type": "module",

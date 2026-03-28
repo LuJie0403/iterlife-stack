@@ -25,6 +25,17 @@ import { CopyActionButton } from '@iterlife/vue-copy-action';
 </template>
 ```
 
+You can override size-related tokens per usage:
+
+```vue
+<CopyActionButton
+  copy-value="hello@example.com"
+  :min-height="42"
+  :padding-inline="12"
+  :border-radius="10"
+/>
+```
+
 ## Exports
 
 - `CopyActionButton`
