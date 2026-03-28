@@ -9,7 +9,7 @@
 当前仓库同时承担两类职责：
 
 - IterLife 统一 CI/CD 控制面。
-- 跨前端共享主题包的发布源仓库。
+- 跨前端共享前端包的发布源仓库。
 
 因此，本仓库只保留“控制面资产”和“共享包资产”，不承载业务应用源码，也不承载业务仓库内部的部署文档。
 
@@ -23,8 +23,10 @@
 ├── config/
 ├── docs/
 ├── packages/
-│   └── themes/
-│       └── dark-universe/
+│   ├── themes/
+│   │   └── dark-universe/
+│   └── vue/
+│       └── copy-action/
 ├── scripts/
 ├── systemd/
 └── webhook/
@@ -52,7 +54,7 @@
 当前仓库已经按以下规则收敛：
 
 - 控制面配置集中在 `config/`、`scripts/`、`systemd/`、`webhook/`。
-- 共享前端资产集中在 `packages/themes/dark-universe/`。
+- 共享前端资产集中在 `packages/themes/dark-universe/` 与 `packages/vue/copy-action/`。
 - 文档集中在 `/docs`，并按“治理 / 运维 / 共享包 / secrets”四类划分。
 - `pnpm-workspace.yaml` 与实际包目录保持一致，覆盖两级包路径。
 
@@ -89,6 +91,7 @@
 - `repository-directory-governance.md` 负责目录结构与治理规则。
 - `unified-deployment-and-operations.md` 负责部署与运维事实。
 - `dark-universe-theme-package.md` 负责共享主题包事实。
+- `vue-copy-action-package.md` 负责共享复制按钮包事实。
 - `github-actions-secrets-inventory.md` 负责 secrets 事实。
 
 ### 6.2 文档写作规则
@@ -103,6 +106,7 @@
 - 调整目录边界或新增目录时，更新本文件。
 - 调整部署流程、服务矩阵、运维命令时，更新 `unified-deployment-and-operations.md`。
 - 调整共享主题包目录、发布方式、消费方式时，更新 `dark-universe-theme-package.md`。
+- 调整共享复制按钮包目录、发布方式、消费方式时，更新 `vue-copy-action-package.md`。
 - 调整 workflow secrets 时，更新 `github-actions-secrets-inventory.md`。
 
 ## 7. 持续治理计划

@@ -1,0 +1,67 @@
+.iterlife-copy-action {
+  --iterlife-copy-action-bg: rgba(25, 34, 50, 0.96);
+  --iterlife-copy-action-border: rgba(92, 115, 153, 0.55);
+  --iterlife-copy-action-color: #d5e4ff;
+  --iterlife-copy-action-hover-bg: rgba(42, 56, 82, 0.96);
+  --iterlife-copy-action-hover-border: rgba(126, 158, 209, 0.9);
+  --iterlife-copy-action-hover-color: #f5f9ff;
+  --iterlife-copy-action-copied-bg: rgba(26, 74, 47, 0.92);
+  --iterlife-copy-action-copied-border: rgba(77, 173, 126, 0.85);
+  --iterlife-copy-action-copied-color: #dcffee;
+  --iterlife-copy-action-failed-bg: rgba(84, 32, 32, 0.92);
+  --iterlife-copy-action-failed-border: rgba(204, 106, 106, 0.85);
+  --iterlife-copy-action-failed-color: #ffe0e0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 72px;
+  padding: 0 14px;
+  border: 1px solid var(--iterlife-copy-action-border);
+  border-radius: 999px;
+  background: var(--iterlife-copy-action-bg);
+  color: var(--iterlife-copy-action-color);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    color 140ms ease,
+    transform 140ms ease;
+}
+
+.iterlife-copy-action:hover {
+  border-color: var(--iterlife-copy-action-hover-border);
+  background: var(--iterlife-copy-action-hover-bg);
+  color: var(--iterlife-copy-action-hover-color);
+  transform: translateY(-1px);
+}
+
+.iterlife-copy-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+.iterlife-copy-action[data-copy-state='copied'] {
+  border-color: var(--iterlife-copy-action-copied-border);
+  background: var(--iterlife-copy-action-copied-bg);
+  color: var(--iterlife-copy-action-copied-color);
+}
+
+.iterlife-copy-action[data-copy-state='failed'] {
+  border-color: var(--iterlife-copy-action-failed-border);
+  background: var(--iterlife-copy-action-failed-bg);
+  color: var(--iterlife-copy-action-failed-color);
+}
+
+.iterlife-copy-action__label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

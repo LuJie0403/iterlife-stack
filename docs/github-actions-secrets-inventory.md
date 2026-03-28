@@ -14,6 +14,8 @@
 
 - 供 `.github/workflows/publish-theme-dark-universe.yml` 的 `publish` job 使用。
 - 作为 `NODE_AUTH_TOKEN` 发布 `@iterlife/theme-dark-universe` 到 npm 官方 registry。
+- 供 `.github/workflows/publish-vue-copy-action.yml` 的 `publish` job 使用。
+- 作为 `NODE_AUTH_TOKEN` 发布 `@iterlife/vue-copy-action` 到 npm 官方 registry。
 
 ## 2. 共享 Release Workflow 所需 Secret
 

@@ -1,0 +1,86 @@
+name: Publish Vue Copy Action
+
+on:
+  pull_request:
+    paths:
+      - 'packages/vue/copy-action/**'
+      - '.github/workflows/publish-vue-copy-action.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/vue/copy-action/**'
+      - '.github/workflows/publish-vue-copy-action.yml'
+    tags:
+      - 'vue-copy-action-v*'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/vue/copy-action
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.8.0
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build package
+        run: pnpm build
+      - name: Verify package metadata
+        run: |
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          const requiredExports = ['.', './style.css'];
+          if (pkg.name !== '@iterlife/vue-copy-action') {
+            throw new Error(`Unexpected package name: ${pkg.name}`);
+          }
+          if (pkg.license !== 'Apache-2.0') {
+            throw new Error(`Unexpected license: ${pkg.license}`);
+          }
+          for (const key of requiredExports) {
+            if (!pkg.exports?.[key]) {
+              throw new Error(`Missing export: ${key}`);
+            }
+          }
+          EOF
+      - name: Verify dist files
+        run: |
+          test -f dist/index.js
+          test -f dist/index.d.ts
+          test -f dist/style.css
+      - name: Verify npm publish contents
+        run: pnpm pack --pack-destination .artifacts
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/vue-copy-action-v')
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: packages/vue/copy-action
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.8.0
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build package
+        run: pnpm build
+      - name: Publish package
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_NPM_PACKAGES_PUBLISH_ACTION_TOKEN }}
