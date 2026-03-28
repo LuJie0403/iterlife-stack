@@ -1,5 +1,5 @@
 import { defineComponent, h, mergeProps, } from 'vue';
-import { useCopyAction } from './useCopyAction';
+import { useCopyAction } from './useCopyAction.js';
 function normalizeCssLength(value) {
     return typeof value === 'number' ? `${value}px` : value;
 }

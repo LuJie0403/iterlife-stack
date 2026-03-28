@@ -1,2 +1,2 @@
-export { CopyActionButton } from './CopyActionButton';
-export { useCopyAction } from './useCopyAction';
+export { CopyActionButton } from './CopyActionButton.js';
+export { useCopyAction } from './useCopyAction.js';

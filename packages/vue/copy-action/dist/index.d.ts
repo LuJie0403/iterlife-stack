@@ -1,3 +1,3 @@
-export { CopyActionButton } from './CopyActionButton';
-export { useCopyAction } from './useCopyAction';
-export type { CopyActionState, UseCopyActionOptions } from './useCopyAction';
+export { CopyActionButton } from './CopyActionButton.js';
+export { useCopyAction } from './useCopyAction.js';
+export type { CopyActionState, UseCopyActionOptions, } from './useCopyAction.js';

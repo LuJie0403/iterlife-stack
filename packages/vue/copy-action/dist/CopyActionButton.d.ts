@@ -1,4 +1,4 @@
-import { type CopyActionState } from './useCopyAction';
+import { type CopyActionState } from './useCopyAction.js';
 export declare const CopyActionButton: import("vue").DefineComponent<import("vue").ExtractPropTypes<{
     copyValue: {
         type: StringConstructor;
