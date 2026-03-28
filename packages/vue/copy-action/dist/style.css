@@ -2,6 +2,10 @@
   --iterlife-copy-action-bg: rgba(25, 34, 50, 0.96);
   --iterlife-copy-action-border: rgba(92, 115, 153, 0.55);
   --iterlife-copy-action-color: #d5e4ff;
+  --iterlife-copy-action-min-height: 44px;
+  --iterlife-copy-action-min-width: 72px;
+  --iterlife-copy-action-padding-inline: 14px;
+  --iterlife-copy-action-radius: 999px;
   --iterlife-copy-action-hover-bg: rgba(42, 56, 82, 0.96);
   --iterlife-copy-action-hover-border: rgba(126, 158, 209, 0.9);
   --iterlife-copy-action-hover-color: #f5f9ff;
@@ -14,11 +18,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  min-width: 72px;
-  padding: 0 14px;
+  min-height: var(--iterlife-copy-action-min-height);
+  min-width: var(--iterlife-copy-action-min-width);
+  padding: 0 var(--iterlife-copy-action-padding-inline);
   border: 1px solid var(--iterlife-copy-action-border);
-  border-radius: 999px;
+  border-radius: var(--iterlife-copy-action-radius);
   background: var(--iterlife-copy-action-bg);
   color: var(--iterlife-copy-action-color);
   font-size: 12px;
@@ -64,4 +68,5 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
 }

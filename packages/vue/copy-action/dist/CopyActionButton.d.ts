@@ -28,6 +28,22 @@ export declare const CopyActionButton: import("vue").DefineComponent<import("vue
         type: StringConstructor;
         default: string;
     };
+    minHeight: {
+        type: (StringConstructor | NumberConstructor)[];
+        default: string;
+    };
+    minWidth: {
+        type: (StringConstructor | NumberConstructor)[];
+        default: string;
+    };
+    paddingInline: {
+        type: (StringConstructor | NumberConstructor)[];
+        default: string;
+    };
+    borderRadius: {
+        type: (StringConstructor | NumberConstructor)[];
+        default: string;
+    };
 }>, () => import("vue").VNode<import("vue").RendererNode, import("vue").RendererElement, {
     [key: string]: any;
 }>, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {
@@ -63,6 +79,22 @@ export declare const CopyActionButton: import("vue").DefineComponent<import("vue
         type: StringConstructor;
         default: string;
     };
+    minHeight: {
+        type: (StringConstructor | NumberConstructor)[];
+        default: string;
+    };
+    minWidth: {
+        type: (StringConstructor | NumberConstructor)[];
+        default: string;
+    };
+    paddingInline: {
+        type: (StringConstructor | NumberConstructor)[];
+        default: string;
+    };
+    borderRadius: {
+        type: (StringConstructor | NumberConstructor)[];
+        default: string;
+    };
 }>> & Readonly<{
     onCopied?: (() => any) | undefined;
     onFailed?: (() => any) | undefined;
@@ -74,4 +106,8 @@ export declare const CopyActionButton: import("vue").DefineComponent<import("vue
     resetDelay: number;
     resetOnMouseleave: boolean;
     ariaLabel: string;
+    minHeight: string | number;
+    minWidth: string | number;
+    paddingInline: string | number;
+    borderRadius: string | number;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, true, {}, any>;

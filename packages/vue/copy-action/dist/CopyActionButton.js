@@ -1,5 +1,8 @@
 import { defineComponent, h, mergeProps, } from 'vue';
 import { useCopyAction } from './useCopyAction';
+function normalizeCssLength(value) {
+    return typeof value === 'number' ? `${value}px` : value;
+}
 export const CopyActionButton = defineComponent({
     name: 'CopyActionButton',
     inheritAttrs: false,
@@ -32,6 +35,22 @@ export const CopyActionButton = defineComponent({
             type: String,
             default: '',
         },
+        minHeight: {
+            type: [Number, String],
+            default: '',
+        },
+        minWidth: {
+            type: [Number, String],
+            default: '',
+        },
+        paddingInline: {
+            type: [Number, String],
+            default: '',
+        },
+        borderRadius: {
+            type: [Number, String],
+            default: '',
+        },
     },
     emits: {
         copied: () => true,
@@ -62,11 +81,28 @@ export const CopyActionButton = defineComponent({
             reset();
             emit('reset', previousState);
         }
+        function resolveVariableStyle() {
+            const style = {};
+            if (props.minHeight !== '') {
+                style['--iterlife-copy-action-min-height'] = normalizeCssLength(props.minHeight);
+            }
+            if (props.minWidth !== '') {
+                style['--iterlife-copy-action-min-width'] = normalizeCssLength(props.minWidth);
+            }
+            if (props.paddingInline !== '') {
+                style['--iterlife-copy-action-padding-inline'] = normalizeCssLength(props.paddingInline);
+            }
+            if (props.borderRadius !== '') {
+                style['--iterlife-copy-action-radius'] = normalizeCssLength(props.borderRadius);
+            }
+            return style;
+        }
         return () => h('button', mergeProps(attrs, {
             type: 'button',
             class: ['iterlife-copy-action', attrs.class],
             'data-copy-state': state.value,
             'aria-label': props.ariaLabel || props.idleLabel,
+            style: [attrs.style, resolveVariableStyle()],
             onClick: handleClick,
             onMouseleave: handleMouseleave,
         }), slots.default

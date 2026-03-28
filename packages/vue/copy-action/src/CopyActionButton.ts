@@ -1,10 +1,14 @@
 import {
+  type CSSProperties,
   defineComponent,
   h,
   mergeProps,
-  type PropType,
 } from 'vue';
 import { useCopyAction, type CopyActionState } from './useCopyAction';
+
+function normalizeCssLength(value: number | string): string {
+  return typeof value === 'number' ? `${value}px` : value;
+}
 
 export const CopyActionButton = defineComponent({
   name: 'CopyActionButton',
@@ -36,6 +40,22 @@ export const CopyActionButton = defineComponent({
     },
     ariaLabel: {
       type: String,
+      default: '',
+    },
+    minHeight: {
+      type: [Number, String],
+      default: '',
+    },
+    minWidth: {
+      type: [Number, String],
+      default: '',
+    },
+    paddingInline: {
+      type: [Number, String],
+      default: '',
+    },
+    borderRadius: {
+      type: [Number, String],
       default: '',
     },
   },
@@ -71,6 +91,31 @@ export const CopyActionButton = defineComponent({
       emit('reset', previousState);
     }
 
+    function resolveVariableStyle(): CSSProperties {
+      const style: CSSProperties = {};
+      if (props.minHeight !== '') {
+        style['--iterlife-copy-action-min-height'] = normalizeCssLength(
+          props.minHeight
+        );
+      }
+      if (props.minWidth !== '') {
+        style['--iterlife-copy-action-min-width'] = normalizeCssLength(
+          props.minWidth
+        );
+      }
+      if (props.paddingInline !== '') {
+        style['--iterlife-copy-action-padding-inline'] = normalizeCssLength(
+          props.paddingInline
+        );
+      }
+      if (props.borderRadius !== '') {
+        style['--iterlife-copy-action-radius'] = normalizeCssLength(
+          props.borderRadius
+        );
+      }
+      return style;
+    }
+
     return () =>
       h(
         'button',
@@ -79,6 +124,7 @@ export const CopyActionButton = defineComponent({
           class: ['iterlife-copy-action', attrs.class],
           'data-copy-state': state.value,
           'aria-label': props.ariaLabel || props.idleLabel,
+          style: [attrs.style, resolveVariableStyle()],
           onClick: handleClick,
           onMouseleave: handleMouseleave,
         }),
