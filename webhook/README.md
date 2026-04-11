@@ -9,7 +9,7 @@
 
 ## 运行时位置
 
-- 真实 env：`/apps/config/iterlife-reunion-stack/iterlife-deploy-webhook.env`
+- 真实 env：`/apps/config/iterlife-stack/iterlife-deploy-webhook.env`
 - 运行日志目录：`/apps/logs/webhook`
 - 日志文件格式：`/apps/logs/webhook/iterlife-deploy-webhook-YYYY-MM-DD.log`
 

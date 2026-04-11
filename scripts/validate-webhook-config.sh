@@ -21,8 +21,8 @@ if [ -n "$TARGETS_FILE_OVERRIDE" ]; then
   targets_path="$TARGETS_FILE_OVERRIDE"
 fi
 
-if [ ! -f "$targets_path" ] && [[ "$targets_path" == /apps/iterlife-reunion-stack/* ]]; then
-  local_candidate="$ROOT_DIR/${targets_path#/apps/iterlife-reunion-stack/}"
+if [ ! -f "$targets_path" ] && [[ "$targets_path" == /apps/iterlife-stack/* ]]; then
+  local_candidate="$ROOT_DIR/${targets_path#/apps/iterlife-stack/}"
   if [ -f "$local_candidate" ]; then
     targets_path="$local_candidate"
   fi
