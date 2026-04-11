@@ -1,0 +1,160 @@
+@startuml
+title IterLife Reunion 文章发布异步处理流程图
+autonumber "<b>[000]"
+
+skinparam Shadowing false
+skinparam sequence {
+  ParticipantPadding 16
+  BoxPadding 10
+  ArrowThickness 1
+  LifeLineBorderColor #6B7280
+  LifeLineBackgroundColor #FFFFFF
+  ParticipantBorderColor #475569
+  ParticipantBackgroundColor #FFFFFF
+  GroupBorderColor #94A3B8
+  GroupBackgroundColor #F8FAFC
+}
+
+box "GitHub 侧" #FFF8E1
+  participant "GitHub Webhook" as GitHubWebhook
+  participant "GitHub API" as GitHubApi
+end box
+
+box "IterLife Reunion 系统" #E3F2FD
+  participant "WebhookController\nWebhook 接收器" as WebhookController
+  participant "ArticlePublishEventService\n发布事件服务" as PublishEventService
+  participant "ArticlePublishEventRepository\n发布事件仓储" as PublishEventRepo
+  participant "publishEventTaskExecutor\n发布线程池" as PublishExecutor
+  participant "Recovery Scheduler\n恢复调度器" as RecoveryScheduler
+  participant "ArticleSyncService\n文章同步服务" as SyncService
+  participant "ArticleFrontmatterService\nFrontMatter 处理服务" as FrontmatterService
+  participant "ArticlePublishEventItemRepository\n发布事件文件项仓储" as PublishEventItemRepo
+  participant "ArticleFrontmatterRepository\nFrontMatter 状态仓储" as FrontmatterRepo
+  participant "ArticleRepository\n文章仓储" as ArticleRepository
+  participant "MeilisearchIndexService\n搜索索引服务" as MeiliService
+end box
+
+note over PublishEventService, PublishExecutor
+代码事实：
+1. webhook 验签成功后先写 article_publish_event
+2. 使用显式 ThreadPoolTaskExecutor 作为发布线程池
+3. 定时扫描 RECEIVED / RETRY_READY / stale in-flight 事件
+end note
+
+note over WebhookController, MeiliService
+当前流程边界：
+1. 202 Accepted 仅表示系统已接单，不表示文章已完成投影
+2. deliveryId、event status、file item status 已落库
+3. 仍缺少后台事件查询 / 重试 / 回放 API
+4. DB 投影与 Meili 仍是最终一致
+end note
+
+== 异步投递 ==
+
+GitHubWebhook -> WebhookController: 发送 webhook 请求
+WebhookController -> PublishEventService: 验签后接收事件
+PublishEventService -> PublishEventRepo: insert RECEIVED
+PublishEventService -> PublishEventRepo: mark DISPATCHING
+PublishEventService -> PublishExecutor: 提交 eventId
+WebhookController --> GitHubWebhook: 202 Accepted(eventId)
+
+note over WebhookController, PublishExecutor
+现状：
+GitHub 侧拿到的是 accepted 状态；
+真正的文件发现、正文拉取、FrontMatter 处理与投影仍在后台继续执行。
+end note
+
+alt 任务提交成功？否
+  PublishExecutor --> PublishEventService: 拒绝执行 / 运行时失败
+  PublishEventService -> PublishEventRepo: mark RETRY_READY + next_retry_at
+else task submitted
+  PublishExecutor -> SyncService ++: processPersistedEvent(eventId)
+end
+
+== 进程内执行 ==
+
+SyncService -> SyncService: 收集路径并开始批次处理
+note over SyncService
+单次 push 的 changed / removed 文件数量没有显式上限，
+批次越大，内存、耗时和外部 API 压力越大。
+end note
+
+alt commits[] file list missing
+  SyncService -> GitHubApi: 调用 compare API
+  GitHubApi --> SyncService: CompareChanges
+  note over SyncService, GitHubApi
+  compare API 失败时仍需要依赖事件级重试或后续运维补偿，
+  当前还没有专门的 compare 子阶段重试编排。
+  end note
+end
+
+loop for each changed file
+  SyncService -> GitHubApi: 调用 contents API 拉取正文
+  alt 正文拉取失败
+    GitHubApi --> SyncService: 空结果 / 错误
+    SyncService -> PublishEventItemRepo: 标记 item=FAILED
+    note over SyncService
+    单文件失败已可追踪，
+    但尚无自动文件级重试 / 手工重试 API。
+    end note
+  else contents fetch success
+    GitHubApi --> SyncService: 返回 markdown 与 sha
+    SyncService -> FrontmatterService: 执行 normalizeChangedFilesIfNeeded(...)
+
+    alt 需要 bot 回写
+      FrontmatterService -> FrontmatterRepo: 插入 PENDING 指纹记录
+      alt 首次出现该 fingerprint
+        FrontmatterRepo --> FrontmatterService: PENDING 已插入
+        FrontmatterService -> GitHubApi: PUT 规范化后的 Markdown
+        alt bot 回写成功
+          GitHubApi --> FrontmatterService: 返回 commit sha
+          FrontmatterService -> FrontmatterRepo: 标记为 NORMALIZED
+          FrontmatterService --> SyncService: replayDeferred++
+          note over FrontmatterService, FrontmatterRepo
+          当前补偿策略仍主要依赖 GitHub 因 bot commit 触发新的 replay push，
+          后续可补“超时未 replay 时主动补投影”。
+          end note
+        else bot 回写失败
+          GitHubApi --> FrontmatterService: 失败
+          FrontmatterService -> FrontmatterRepo: 标记为 FAILED
+          FrontmatterService --> SyncService: 回退为进程内直接投影
+        end
+      else fingerprint already exists
+        FrontmatterRepo --> FrontmatterService: 返回 PENDING / FAILED / NORMALIZED
+        note over FrontmatterService
+        当前已具备的局部幂等：
+        通过 fingerprint 防重复提交、识别 replay、
+        并对 FAILED 提供 markPendingForRetry。
+        end note
+      end
+    else 不需要 bot 回写
+      FrontmatterService --> SyncService: 直接透传
+    end
+
+    SyncService -> ArticleRepository: upsertArticleWithMappings(meta)
+    ArticleRepository --> SyncService: 数据库已更新
+    SyncService -> MeiliService: upsert 搜索索引
+    note over SyncService, MeiliService
+    article 投影和 Meili 同步不是统一事务。
+    DB 成功、Meili 失败时，会出现短暂或长期索引不一致。
+    end note
+  end
+end
+
+== 恢复与补偿边界 ==
+
+RecoveryScheduler -> PublishEventRepo: 扫描 RECEIVED / RETRY_READY / stale in-flight
+PublishEventRepo --> RecoveryScheduler: 返回待恢复事件
+RecoveryScheduler -> PublishEventService: 重新分发 eventId
+
+alt 异步任务执行完成
+  SyncService -> SyncService: 记录最终统计
+else 仍存在失败 item / 失败 event
+  SyncService -> PublishEventRepo: 更新 FAILED / PARTIAL_FAILED / RETRY_READY
+  note over PublishEventRepo
+  剩余短板：
+  仍缺少面向运维的事件详情、手工重试、回放与索引重建 API。
+  end note
+end
+
+@enduml

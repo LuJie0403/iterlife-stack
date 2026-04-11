@@ -1,10 +1,11 @@
 # iterlife-reunion-stack
 
-IterLife 控制面与共享前端资产仓。
+IterLife 控制面、正式文档与共享前端资产仓。
 
 ## 当前职责
 
 - 统一 webhook 部署控制面。
+- 统一管理正式设计、架构、产品、部署和治理文档。
 - 部署目标注册表与通用部署脚本。
 - webhook 的 systemd 运行资产。
 - 跨前端共享主题包 `@iterlife/theme-dark-universe`。
@@ -16,7 +17,7 @@ IterLife 控制面与共享前端资产仓。
 ```text
 .github/workflows/    GitHub Actions 工作流
 config/               部署目标注册表
-docs/                 治理、运维与共享包文档
+docs/                 应用文档、治理、运维与共享包文档
 packages/             前端共享包（themes / vue）
 scripts/              通用部署与校验脚本
 systemd/              webhook 服务 unit 与 drop-in
@@ -26,14 +27,16 @@ webhook/              webhook 服务源码与示例 env
 ## 文档入口
 
 - [docs/repository-directory-governance.md](./docs/repository-directory-governance.md)
+- [docs/README.md](./docs/README.md)
 - [docs/unified-deployment-and-operations.md](./docs/unified-deployment-and-operations.md)
 - [docs/dark-universe-theme-package.md](./docs/dark-universe-theme-package.md)
 - [docs/vue-copy-action-package.md](./docs/vue-copy-action-package.md)
 - [docs/github-actions-secrets-inventory.md](./docs/github-actions-secrets-inventory.md)
 - [docs/server-governance-audit-20260323.md](./docs/server-governance-audit-20260323.md)
 
-`/docs` 只承载当前仍然有效的治理规则、运维基线和共享资产说明，不记录已经下线的迁移过程，也不重复业务仓库自己的 README。
+`/docs` 是 IterLife 体系正式非代码文档的单一事实源，统一承载应用设计、产品、架构、部署差异、治理规则、运维基线和共享资产说明。
 
+- [docs/README.md](./docs/README.md)：所有应用与平台文档的总入口。
 - [docs/repository-directory-governance.md](./docs/repository-directory-governance.md)：仓库顶层目录、目录边界、准入规则和持续治理计划。
 - [docs/unified-deployment-and-operations.md](./docs/unified-deployment-and-operations.md)：统一 GHCR + webhook 部署链路、服务器初始化、发布检查、回滚与排障。
 - [docs/dark-universe-theme-package.md](./docs/dark-universe-theme-package.md)：`@iterlife/theme-dark-universe` 的目录、边界、发布和消费方式。
@@ -52,6 +55,7 @@ webhook/              webhook 服务源码与示例 env
 ## 文档更新入口
 
 - 调整顶层目录、目录职责或文档分层时，更新 [docs/repository-directory-governance.md](./docs/repository-directory-governance.md)。
+- 调整任一应用的正式设计、架构、产品或部署差异文档时，更新对应 `docs/<app>/` 目录。
 - 调整 webhook、systemd、部署脚本、部署目标注册表或发布流程时，更新 [docs/unified-deployment-and-operations.md](./docs/unified-deployment-and-operations.md)。
 - 调整 `packages/themes/dark-universe` 的目录、发布方式或接入方式时，更新 [docs/dark-universe-theme-package.md](./docs/dark-universe-theme-package.md)。
 - 调整 `packages/vue/copy-action` 的目录、发布方式或接入方式时，更新 [docs/vue-copy-action-package.md](./docs/vue-copy-action-package.md)。

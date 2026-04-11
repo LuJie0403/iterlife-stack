@@ -6,12 +6,13 @@
 
 ## 1. 仓库定位
 
-当前仓库同时承担两类职责：
+当前仓库同时承担三类职责：
 
 - IterLife 统一 CI/CD 控制面。
 - 跨前端共享前端包的发布源仓库。
+- IterLife 正式非代码文档事实源。
 
-因此，本仓库只保留“控制面资产”和“共享包资产”，不承载业务应用源码，也不承载业务仓库内部的部署文档。
+因此，本仓库只保留“控制面资产”“共享包资产”和“正式文档资产”，不承载业务应用源码。
 
 ## 2. 当前顶层目录
 
@@ -43,7 +44,7 @@
 | --- | --- | --- |
 | `.github/workflows/` | 统一发布和共享包发布的 GitHub Actions 工作流 | 只放仓库级自动化；业务仓库专属 workflow 不进入本仓库 |
 | `config/` | 部署目标注册表等静态配置 | 只放可入库、可审计、非私密配置 |
-| `docs/` | 当前有效的治理、运维和共享包说明 | 只放长期有效文档，不放临时排查记录 |
+| `docs/` | 当前有效的治理、运维、共享包说明和应用正式文档 | 只放长期有效文档，不放临时排查记录 |
 | `packages/` | 可复用前端共享包 | 采用 `packages/<domain>/<package>` 结构收纳 |
 | `scripts/` | 被 webhook 或运维流程调用的通用脚本 | 只放通用脚本，不放某个业务仓库私有部署脚本 |
 | `systemd/` | 控制面服务的 unit 和 drop-in | 只保留 webhook 运行所需资产 |
@@ -55,7 +56,7 @@
 
 - 控制面配置集中在 `config/`、`scripts/`、`systemd/`、`webhook/`。
 - 共享前端资产集中在 `packages/themes/dark-universe/` 与 `packages/vue/copy-action/`。
-- 文档集中在 `/docs`，并按“治理 / 运维 / 共享包 / secrets”四类划分。
+- 文档集中在 `/docs`，并按“应用文档 / 平台治理 / 运维 / 共享包 / secrets”划分。
 - `pnpm-workspace.yaml` 与实际包目录保持一致，覆盖两级包路径。
 
 ## 5. 顶层目录治理规则
@@ -88,11 +89,13 @@
 
 ### 6.1 文档边界
 
+- `README.md` 负责文档总入口。
 - `repository-directory-governance.md` 负责目录结构与治理规则。
 - `unified-deployment-and-operations.md` 负责部署与运维事实。
 - `dark-universe-theme-package.md` 负责共享主题包事实。
 - `vue-copy-action-package.md` 负责共享复制按钮包事实。
 - `github-actions-secrets-inventory.md` 负责 secrets 事实。
+- `docs/<app>/` 负责具体应用的正式设计、产品、架构、部署和治理文档。
 
 ### 6.2 文档写作规则
 
@@ -104,6 +107,7 @@
 ### 6.3 文档更新触发器
 
 - 调整目录边界或新增目录时，更新本文件。
+- 调整应用设计、产品、架构、部署差异文档时，更新对应的 `docs/<app>/` 目录。
 - 调整部署流程、服务矩阵、运维命令时，更新 `unified-deployment-and-operations.md`。
 - 调整共享主题包目录、发布方式、消费方式时，更新 `dark-universe-theme-package.md`。
 - 调整共享复制按钮包目录、发布方式、消费方式时，更新 `vue-copy-action-package.md`。
