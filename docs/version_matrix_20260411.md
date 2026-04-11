@@ -28,8 +28,8 @@ IterLife 当前采用两层版本模型：
 | --- | --- | --- | --- | --- | --- |
 | Reunion API | `iterlife-reunion` | `1.1.0` | `release_v1.1.0` | 已正式发布 | 文章管理、文章发布投影、GitHub 登录、评论能力 |
 | Reunion UI | `iterlife-reunion-ui` | `1.1.0` | `release_v1.1.0` | 已正式发布 | 文章阅读、Markdown 渲染、代码高亮、Mermaid、评论与文章详情交互 |
-| 花多少 API | `iterlife-expenses` | 尚未标准化 | 历史存在 `openclaw-expenses_v1.0.0` ~ `openclaw-expenses_v1.2.0` | 待统一治理 | 账号登录、消费汇总、月度统计、分类与支付方式、时间线、星尘视图 |
-| 花多少 UI | `iterlife-expenses-ui` | `1.0.0` | 暂无正式 `release_v*` 标签 | 已有稳定基线，待统一标签 | 登录、消费看板、全局年份筛选、图表与统计交互 |
+| 花多少 API | `iterlife-expenses` | `1.1.0` | `release_v1.1.0` | 已正式发布 | 账号登录、消费汇总、月度统计、分类与支付方式、时间线、星尘视图 |
+| 花多少 UI | `iterlife-expenses-ui` | `1.1.0` | `release_v1.1.0` | 已正式发布 | 登录、消费看板、全局年份筛选、图表与统计交互 |
 | IDaaS API | `iterlife-idaas` | `0.1.0-SNAPSHOT` | 无 | 开发中 | 统一认证后端骨架、健康检查、基础安全配置 |
 | IDaaS UI | `iterlife-idaas-ui` | `0.1.0-SNAPSHOT` | 无 | 开发中 | 统一认证前端骨架、登录入口壳层 |
 
@@ -46,11 +46,12 @@ IterLife 当前采用两层版本模型：
 
 ### 3.2 花多少版本线
 
-`iterlife-expenses` / `iterlife-expenses-ui` 目前版本治理还未完全统一，当前状态是：
+`iterlife-expenses` / `iterlife-expenses-ui` 当前统一调整到 `1.1.0` 版本线，基线含义如下：
 
-- 后端历史标签仍沿用 `openclaw-expenses_v*` 旧命名。
-- 前端已声明 `1.0.0`，但尚未建立与后端一致的正式 `release_v*` 标签线。
-- 当前应优先补齐后端代码内版本源，再统一前后端的标签和 release 规则。
+- 后端已在代码内声明正式版本 `1.1.0`。
+- 前端已在代码内声明正式版本 `1.1.0`。
+- 当前正式发布标签统一为 `release_v1.1.0`。
+- 旧的 `openclaw-expenses_v*` 标签已退出当前标准版本线。
 
 ### 3.3 身份管理版本线
 
@@ -66,6 +67,7 @@ IterLife 当前采用两层版本模型：
 | --- | --- | --- | --- | --- |
 | 2026-03-14 | Reunion API + Reunion UI | `v1.0.0` / `release_v1.0.0` | 首个正式版本 | 完成文章发布、阅读、分享和个人主页基线 |
 | 2026-04-11 | Reunion API + Reunion UI | `1.1.0` / `release_v1.1.0` | 当前正式基线 | 收敛到统一版本台账，内容系统进入 `1.1.x` 线 |
+| 2026-04-11 | 花多少 API + 花多少 UI | `1.1.0` / `release_v1.1.0` | 当前正式基线 | API / UI 版本与标签统一到 `1.1.0` 线 |
 | 2026-04-11 | IDaaS API | `0.1.0-SNAPSHOT` | 开发基线建立 | 统一认证后端仓库已完成骨架搭建 |
 | 2026-04-11 | IDaaS UI | `0.1.0-SNAPSHOT` | 开发基线建立 | 统一认证前端仓库已完成骨架搭建 |
 | 历史遗留 | 花多少 API | `openclaw-expenses_v1.0.0` ~ `openclaw-expenses_v1.2.0` | 历史标签 | 保留用于追溯，但不再作为后续标准 |
@@ -94,11 +96,11 @@ IterLife 当前采用两层版本模型：
 ### 5.4 文档同步规则
 
 - 调整任一应用版本号时，必须同步更新本文件。
-- 若版本变更对应明确里程碑，建议同步补充对应应用目录下的 release notes。
+- 若版本变更对应明确里程碑，建议同步补充对应应用的平铺 release notes，例如 `reunion_release_release_notes_v1_1_0_20260411.md`。
 - 版本矩阵与应用仓库实际声明版本不一致时，以代码声明版本为准，并尽快修正文档。
 
 ## 6. 当前待办
 
-1. 为 `iterlife-expenses` 建立正式代码内版本源。
-2. 为 `iterlife-expenses` / `iterlife-expenses-ui` 统一标签命名与 release 规则。
-3. 视 `Reunion 1.1.0` 的发布范围，再决定是否补写独立 `release-notes-v1.1.0.md`。
+1. 视 `Reunion 1.1.0` 的发布范围，再决定是否补写独立 `release-notes-v1.1.0.md`。
+2. 视 `Expenses 1.1.0` 的发布范围，决定是否补写独立版本说明。
+3. 在 `IDaaS` 完成第一个正式可发布里程碑后，再创建对应正式标签线。
