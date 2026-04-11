@@ -1,4 +1,4 @@
-# Expenses 文档
+# 花多少文档
 
 本目录收口 `iterlife-expenses` 的正式非代码文档。
 

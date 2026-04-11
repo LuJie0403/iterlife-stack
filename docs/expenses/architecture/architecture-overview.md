@@ -1,4 +1,4 @@
-# 花哪儿后端架构概览
+# 花多少后端架构概览
 
 本文档只描述当前代码中的真实结构，不展开重复的部署说明。标准部署链路请看 `../../unified-deployment-and-operations.md`，应用文档入口见 `../README.md`。
 
@@ -42,6 +42,6 @@
 ## 5. 文档与代码的一致性结论
 
 - 当前 API 主入口与 README、Dockerfile、`backend/start.sh` 一致
-- 文档已收敛为根 `README.md` 和本架构文档两个仓库内入口
+- 正式文档已迁移到 `iterlife-reunion-stack/docs/expenses/`，业务仓仅保留根 `README.md`
 - 部署脚本统一放在后端仓库根目录，UI 仓库不维护独立 `.sh` 运维脚本
 - 主要需要注意的复杂点不是路由或部署，而是“运行时配置”和“初始化脚本配置”分属两套模块
