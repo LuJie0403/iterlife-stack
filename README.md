@@ -41,17 +41,13 @@ cd packages/vue/copy-action && pnpm build
 
 ## 文档入口 / Documentation
 
-- [docs/governance_repository_directory_20260411.md](./docs/governance_repository_directory_20260411.md)
-- [docs/version_matrix_20260411.md](./docs/version_matrix_20260411.md)
-- [docs/operations_unified_deployment_and_operations_20260411.md](./docs/operations_unified_deployment_and_operations_20260411.md)
-- [docs/operations_service_runtime_inventory_20260417.md](./docs/operations_service_runtime_inventory_20260417.md)
-- [docs/operations_readonly_inspection_checklist_20260417.md](./docs/operations_readonly_inspection_checklist_20260417.md)
-- [docs/governance_server_control_plane_20260417.md](./docs/governance_server_control_plane_20260417.md)
-- [docs/shared_design_frontend_packages_20260411.md](./docs/shared_design_frontend_packages_20260411.md)
-- [docs/idaas/idaas_design_identity_management_20260411.md](./docs/idaas/idaas_design_identity_management_20260411.md)
-- [docs/reunion/reunion_overview_system_overview_20260411.md](./docs/reunion/reunion_overview_system_overview_20260411.md)
-- [docs/reunion/reunion_product_product_overview_20260411.md](./docs/reunion/reunion_product_product_overview_20260411.md)
-- [docs/expenses/expenses_overview_system_overview_20260411.md](./docs/expenses/expenses_overview_system_overview_20260411.md)
+- [docs/governance_repository_structure_20260411.md](./docs/governance_repository_structure_20260411.md)
+- [docs/operations_deployment_baseline_20260411.md](./docs/operations_deployment_baseline_20260411.md)
+- [docs/design_frontend_packages_20260411.md](./docs/design_frontend_packages_20260411.md)
+- [docs/idaas/idaas_design_identity_20260411.md](./docs/idaas/idaas_design_identity_20260411.md)
+- [docs/reunion/reunion_design_overview_20260411.md](./docs/reunion/reunion_design_overview_20260411.md)
+- [docs/reunion/reunion_product_overview_20260411.md](./docs/reunion/reunion_product_overview_20260411.md)
+- [docs/expenses/expenses_design_overview_20260411.md](./docs/expenses/expenses_design_overview_20260411.md)
 
 ## 质量检查 / Quality Checks
 
