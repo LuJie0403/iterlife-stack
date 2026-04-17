@@ -29,6 +29,7 @@ webhook/              webhook 服务源码与示例 env
 - [docs/governance_repository_directory_20260411.md](./docs/governance_repository_directory_20260411.md)
 - [docs/version_matrix_20260411.md](./docs/version_matrix_20260411.md)
 - [docs/operations_unified_deployment_and_operations_20260411.md](./docs/operations_unified_deployment_and_operations_20260411.md)
+- [docs/governance_legacy_control_assets_retirement_20260417.md](./docs/governance_legacy_control_assets_retirement_20260417.md)
 - [docs/shared_design_frontend_packages_20260411.md](./docs/shared_design_frontend_packages_20260411.md)
 - [docs/idaas/idaas_design_identity_management_20260411.md](./docs/idaas/idaas_design_identity_management_20260411.md)
 - [docs/reunion/reunion_overview_system_overview_20260411.md](./docs/reunion/reunion_overview_system_overview_20260411.md)
