@@ -99,6 +99,12 @@ jobs:
           tags: |
             ghcr.io/${{ steps.vars.outputs.owner_lc }}/${{ inputs.image_name }}:main-latest
             ghcr.io/${{ steps.vars.outputs.owner_lc }}/${{ inputs.image_name }}:sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=sha-${{ github.sha }}
+            io.iterlife.environment=${{ inputs.environment }}
+            io.iterlife.service=${{ inputs.service }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

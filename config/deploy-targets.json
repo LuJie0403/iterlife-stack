@@ -21,6 +21,30 @@
     "healthcheck_url": "http://127.0.0.1:13180",
     "compose_no_deps": true
   },
+  "iterlife-idaas-api": {
+    "repo_dir": "/apps/iterlife-idaas",
+    "compose_file": "/apps/iterlife-idaas/deploy/compose/idaas-api.yml",
+    "compose_project_directory": "/apps/iterlife-idaas",
+    "compose_service": "iterlife-idaas-api",
+    "release_image_env": "API_IMAGE_REF",
+    "runtime_image_env": "RUNTIME_API_IMAGE_NAME",
+    "runtime_image_name": "iterlife-idaas-api:prod",
+    "deployment_state_file": "/apps/logs/deploy-state/iterlife-idaas-api.json",
+    "healthcheck_url": "http://127.0.0.1:18280/actuator/health",
+    "compose_no_deps": true
+  },
+  "iterlife-idaas-ui": {
+    "repo_dir": "/apps/iterlife-idaas-ui",
+    "compose_file": "/apps/iterlife-idaas-ui/deploy/compose/idaas-ui.yml",
+    "compose_project_directory": "/apps/iterlife-idaas-ui",
+    "compose_service": "iterlife-idaas-ui",
+    "release_image_env": "UI_IMAGE_REF",
+    "runtime_image_env": "RUNTIME_UI_IMAGE_NAME",
+    "runtime_image_name": "iterlife-idaas-ui:prod",
+    "deployment_state_file": "/apps/logs/deploy-state/iterlife-idaas-ui.json",
+    "healthcheck_url": "http://127.0.0.1:13280",
+    "compose_no_deps": true
+  },
   "iterlife-reunion-api": {
     "compose_file": "/apps/iterlife-stack/deploy/compose/reunion-api.yml",
     "compose_project_directory": "/apps/iterlife-stack",

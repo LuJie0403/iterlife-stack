@@ -2,7 +2,7 @@
 
 最后更新：2026-04-11
 
-本文档统一描述 Reunion 当前的系统结构、文章发布链路和阅读侧边界。
+本文档统一描述 Reunion 当前的系统结构、文章发布链路、身份接入方式和阅读侧边界。
 
 ## 1. 系统范围
 
@@ -17,7 +17,7 @@ Reunion 当前由两个应用组成：
 
 - 文章查询接口
 - GitHub 驱动的文章同步与发布投影
-- GitHub 登录与评论鉴权
+- 统一身份接入后的评论鉴权
 - 评论读写与健康检查
 - Meilisearch 集成
 
@@ -79,19 +79,24 @@ Reunion 当前由两个应用组成：
 
 ### 认证与评论接口
 
-- `GET /api/auth/github/url`
-- `POST /api/auth/github/callback`
-- `POST /api/auth/email/bind`
+- `GET /api/auth/login-url`
+- `GET /api/auth/session-center-url`
 - `GET /api/auth/me`
+- `POST /api/auth/logout`
+- `POST /api/auth/logout-all`
 - `POST /api/comment/publish`
 - `GET /api/comment/article/{articleId}`
+
+### 业务 webhook 接口
+
+- `POST /api/webhook/github/push`
 
 ## 6. 当前重点与边界
 
 当前重点：
 
 - 保持文章同步链路稳定
-- 继续推进统一身份改造
+- 与统一身份体系继续协同演进
 - 逐步补齐自动化测试和可观测性
 
 当前不在正式文档体系中继续细拆：

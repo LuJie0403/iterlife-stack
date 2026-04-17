@@ -28,6 +28,13 @@ if [ ! -f "$targets_path" ] && [[ "$targets_path" == /apps/iterlife-stack/* ]]; 
   fi
 fi
 
+if [ ! -f "$targets_path" ] && [[ "$targets_path" == /apps/iterlife-reunion-stack/* ]]; then
+  local_candidate="$ROOT_DIR/${targets_path#/apps/iterlife-reunion-stack/}"
+  if [ -f "$local_candidate" ]; then
+    targets_path="$local_candidate"
+  fi
+fi
+
 [ -f "$targets_path" ] || die "deploy targets file not found: $targets_path"
 
 python3 - "$targets_path" <<'PY'
