@@ -4,6 +4,11 @@
 
 本文档是 IterLife 当前统一部署事实源，覆盖发布路径、Secrets、服务器运行路径、回滚和排障。
 
+制度化基线与新增服务接入模板见：
+
+- `docs/governance_control_plane_operating_baseline_20260417.md`
+- `docs/operations_service_onboarding_template_20260417.md`
+
 ## 1. 适用范围
 
 当前纳入统一控制面的服务：
