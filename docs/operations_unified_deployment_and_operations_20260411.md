@@ -1,6 +1,6 @@
 # 统一部署与运维
 
-最后更新：2026-04-11
+最后更新：2026-04-17
 
 本文档是 IterLife 当前统一部署事实源，覆盖发布路径、Secrets、服务器运行路径、回滚和排障。
 
@@ -12,6 +12,8 @@
 - `iterlife-reunion-ui`
 - `iterlife-expenses-api`
 - `iterlife-expenses-ui`
+- `iterlife-idaas-api`
+- `iterlife-idaas-ui`
 
 ## 2. 标准发布路径
 
@@ -51,6 +53,8 @@
 | `iterlife-reunion-ui` | `/apps/iterlife-reunion-ui` | `/apps/iterlife-reunion-ui/deploy/compose/reunion-ui.yml` | `http://127.0.0.1:13080` |
 | `iterlife-expenses-api` | `/apps/iterlife-expenses` | `/apps/iterlife-expenses/deploy/compose/expenses-api.yml` | `http://127.0.0.1:18180/api/health` |
 | `iterlife-expenses-ui` | `/apps/iterlife-expenses-ui` | `/apps/iterlife-expenses-ui/deploy/compose/expenses-ui.yml` | `http://127.0.0.1:13180` |
+| `iterlife-idaas-api` | `/apps/iterlife-idaas` | `/apps/iterlife-idaas/deploy/compose/idaas-api.yml` | `http://127.0.0.1:18280/actuator/health` |
+| `iterlife-idaas-ui` | `/apps/iterlife-idaas-ui` | `/apps/iterlife-idaas-ui/deploy/compose/idaas-ui.yml` | `http://127.0.0.1:13280` |
 
 以上事实以 `config/deploy-targets.json` 为准。
 
@@ -80,6 +84,8 @@
 - `iterlife-reunion-ui`
 - `iterlife-expenses`
 - `iterlife-expenses-ui`
+- `iterlife-idaas`
+- `iterlife-idaas-ui`
 
 ### 5.3 GitHub 自动提供的 Token
 
@@ -92,21 +98,23 @@
 
 ## 6. 服务器运行时路径
 
-- 控制面仓库：`/apps/iterlife-stack`
-- webhook 真实 env：`/apps/config/iterlife-stack/iterlife-deploy-webhook.env`
+- 控制面仓库：`/apps/iterlife-reunion-stack`
+- webhook 真实 env：`/apps/config/iterlife-reunion-stack/iterlife-deploy-webhook.env`
 - webhook 日志目录：`/apps/logs/webhook`
 - systemd unit：`/etc/systemd/system/iterlife-app-deploy-webhook.service`
 - systemd drop-in：`/etc/systemd/system/iterlife-app-deploy-webhook.service.d/`
+- 宿主机 Nginx 生效目录：`/etc/nginx`
+- 宿主机 Nginx 备份与快照目录：`/apps/config/nginx`
 
 ## 7. 新服务器初始化
 
 ```bash
 cd /apps
-git clone git@github.com:LuJie0403/iterlife-stack.git
-cd /apps/iterlife-stack
-mkdir -p /apps/config/iterlife-stack
+git clone git@github.com:LuJie0403/iterlife-stack.git /apps/iterlife-reunion-stack
+cd /apps/iterlife-reunion-stack
+mkdir -p /apps/config/iterlife-reunion-stack
 cp webhook/iterlife-deploy-webhook.env.example \
-  /apps/config/iterlife-stack/iterlife-deploy-webhook.env
+  /apps/config/iterlife-reunion-stack/iterlife-deploy-webhook.env
 sudo install -D -m 644 systemd/iterlife-app-deploy-webhook.service \
   /etc/systemd/system/iterlife-app-deploy-webhook.service
 sudo install -D -m 644 systemd/iterlife-app-deploy-webhook.service.d/10-log-perms.conf \
@@ -114,7 +122,7 @@ sudo install -D -m 644 systemd/iterlife-app-deploy-webhook.service.d/10-log-perm
 sudo systemctl daemon-reload
 sudo systemctl enable --now iterlife-app-deploy-webhook.service
 bash scripts/validate-webhook-config.sh \
-  /apps/config/iterlife-stack/iterlife-deploy-webhook.env
+  /apps/config/iterlife-reunion-stack/iterlife-deploy-webhook.env
 ```
 
 ## 8. 日常检查
@@ -140,6 +148,8 @@ curl -fsS http://127.0.0.1:18080/api/health
 curl -fsS http://127.0.0.1:13080
 curl -fsS http://127.0.0.1:18180/api/health
 curl -fsS http://127.0.0.1:13180
+curl -fsS http://127.0.0.1:18280/actuator/health
+curl -fsS http://127.0.0.1:13280
 ```
 
 ## 10. 回滚
@@ -189,6 +199,8 @@ payload='{
 - `127.0.0.1:13080`：reunion UI
 - `127.0.0.1:18180`：expenses API
 - `127.0.0.1:13180`：expenses UI
+- `127.0.0.1:18280`：idaas API
+- `127.0.0.1:13280`：idaas UI
 - `127.0.0.1` 和 `172.17.0.1`：Redis
 - `127.0.0.1:3128`：Squid
 
@@ -198,3 +210,4 @@ payload='{
 - 生产流量不再依赖历史 `/www` 运行模型，宿主机 Nginx 以 `/etc/nginx` 为准。
 - 运行资产、部署链路与日志目录已经收敛到当前控制面基线。
 - 如需继续调整主机级治理策略，应直接更新本文档，不再单独拆分新的根目录运维审计文档。
+- 控制面当前服务器路径仍为 `/apps/iterlife-reunion-stack`，如需迁移到 `/apps/iterlife-stack`，应按控制面治理方案分阶段执行。
