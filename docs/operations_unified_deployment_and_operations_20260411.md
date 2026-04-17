@@ -42,6 +42,9 @@
 - `systemd/iterlife-app-deploy-webhook.service`
 - `.github/workflows/reusable-release-ghcr-webhook.yml`
 
+当前只有上述资产属于生产部署控制面事实源。
+业务仓中如存在 `WebhookController`、`GITHUB_WEBHOOK_SECRET` 等业务集成入口，不应视为部署控制面的一部分。
+
 ## 4. 当前部署矩阵
 
 | Service | Repo Dir | Compose File | Healthcheck |

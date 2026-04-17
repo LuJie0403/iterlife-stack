@@ -44,6 +44,7 @@ webhook/              webhook 服务源码与示例环境文件
 - 静态事实放 `config/`。
 - 执行动作放 `scripts/`。
 - 运行时模板放 `webhook/*.example` 一类示例文件。
+- 部署控制面现役资产只保留在当前控制面仓中；历史部署资产如已退出主链路，应标记为遗留，不再在业务仓内继续扩散。
 
 ### 3.3 文档治理
 
@@ -58,6 +59,7 @@ webhook/              webhook 服务源码与示例环境文件
 - 目录结构或治理规则变化：更新本文档。
 - 版本号或发布基线变化：更新 `version_matrix_20260411.md`。
 - 部署链路、Secrets、服务器路径变化：更新 `operations_unified_deployment_and_operations_20260411.md`。
+- 旧控制面资产退场、现役事实源变化：更新 `governance_legacy_control_assets_retirement_20260417.md`。
 - 共享包边界、发布或接入方式变化：更新 `shared_design_frontend_packages_20260411.md`。
 - 身份体系、会话模型、IDaaS 拆分变化：更新 `idaas/idaas_design_identity_management_20260411.md`。
 - 应用结构或核心产品方向变化：更新对应的应用概览文档。
