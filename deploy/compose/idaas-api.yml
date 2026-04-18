@@ -8,7 +8,7 @@ services:
       - ${BACKEND_ENV_FILE:-/apps/config/iterlife-idaas/backend.env}
     environment:
       TZ: ${TZ:-Asia/Shanghai}
-      JAVA_TOOL_OPTIONS: -Duser.timezone=${TZ:-Asia/Shanghai}
+      JAVA_TOOL_OPTIONS: -Duser.timezone=${TZ:-Asia/Shanghai} -Djdk.http.auth.tunneling.disabledSchemes=
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
