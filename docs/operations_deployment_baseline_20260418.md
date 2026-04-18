@@ -89,6 +89,8 @@
 - Python API 与 Nginx 静态前端优先使用容器内日志包装器将 stdout/stderr 汇总到按日文件。
 - 默认保留期为 30 天；Java 服务默认总量上限为 `2GB`。
 - 新服务接入统一控制面时，必须同时补齐日志目录挂载、日志环境变量和本文档条目。
+- 若宿主机 `/apps/logs/<app>/<component>/` 为空，但 `docker logs <container>` 持续有输出，优先检查运行中容器是否实际带有 `APP_LOG_DIR`、`APP_LOG_FILE_PREFIX` 和对应 bind mount。
+- 对 Java 服务，若未注入 `APP_LOG_DIR`，logback 会回退到容器工作目录下的 `./logs/<service>-YYYY-MM-DD.log`；这属于控制面编排未生效，不属于应用本身未产生日志。
 
 ## 6. GitHub Actions 与 Secrets
 
