@@ -1,6 +1,8 @@
 # 统一身份管理设计
 
-最后更新：2026-04-11
+最后更新：2026-04-18
+
+本文档统一描述 IterLife 当前统一身份层的定位、能力边界和核心模型。
 
 适用范围：`iterlife-reunion`、`iterlife-reunion-ui`、`iterlife-expenses`、`iterlife-expenses-ui`、`iterlife-idaas`、`iterlife-idaas-ui`
 
@@ -93,7 +95,6 @@
 
 ## 6. 当前接入状态
 
-- `iterlife-idaas` / `iterlife-idaas-ui` 当前版本为 `0.1.0-SNAPSHOT`。
 - `reunion` 已具备统一登录入口、会话中心入口和统一登出接口。
 - `expenses` 当前主线仍保留本地 JWT 登录实现，后续继续向统一身份收敛。
-- 正式发布与运维事实源统一收敛在 `iterlife-stack/docs/operations_deployment_baseline_20260411.md`。
+- 版本、发布与运维基线统一收敛在 `../operations_deployment_baseline_20260418.md`。

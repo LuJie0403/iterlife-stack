@@ -1,8 +1,8 @@
 # 统一部署与运维
 
-最后更新：2026-04-17
+最后更新：2026-04-18
 
-本文档是 IterLife 当前统一部署与运维事实源，覆盖服务器基准状态、发布链路、版本基线、配置与 Secrets、服务映射、例行巡检、回滚与排障入口。
+本文档是 IterLife 当前统一部署与运维事实源，覆盖服务器基准状态、发布链路、版本基线、配置与 Secrets、服务映射、服务接入、例行巡检、回滚与排障入口。此前分散在多份 `operations_*` 根目录文档中的稳定结论，已经统一收敛到本文件。
 
 ## 1. 适用范围
 
@@ -69,6 +69,7 @@
 
 以上事实以 `/apps/iterlife-stack/config/deploy-targets.json` 为准。  
 运行中的实际镜像版本，以最近一次标准发布生成的部署状态文件和容器 `Config.Image` 为准。
+`config/deploy-targets.json` 中同一 `service` 不允许重复定义，避免保留被历史条目覆盖的伪基线。
 
 ## 6. GitHub Actions 与 Secrets
 
@@ -108,9 +109,17 @@
 - 登录 GHCR
 - checkout 当前仓库代码
 
-## 7. 当前版本基线
+## 7. 当前版本与发布基线
 
-当前统一版本基线如下：
+版本号的代码事实源仍在各业务仓库内维护，本文件只保留 IterLife 当前统一运维所需的发布基线口径：
+
+- Java 服务以 `pom.xml` 为代码版本源。
+- Node / Nuxt / Vite 前端以 `package.json` 为代码版本源。
+- Python 服务在补齐统一版本文件之前，以应用内单一显式版本声明为准。
+- 正式发布标签统一使用 `release_vX.Y.Z`。
+- 尚未形成正式发布基线的服务保持 `-SNAPSHOT`，且不发布正式 tag。
+
+### 7.1 当前发布矩阵
 
 | 应用 | 仓库 | 当前声明版本 | 当前标签基线 | 发布状态 |
 | --- | --- | --- | --- | --- |
@@ -121,23 +130,29 @@
 | IDaaS API | `iterlife-idaas` | `0.1.0-SNAPSHOT` | 无 | 开发中 |
 | IDaaS UI | `iterlife-idaas-ui` | `0.1.0-SNAPSHOT` | 无 | 开发中 |
 
-统一规则：
+### 7.2 当前版本线说明
 
-- Java 服务以 `pom.xml` 为版本源。
-- Node / Nuxt / Vite 前端以 `package.json` 为版本源。
-- 正式发布标签统一使用 `release_vX.Y.Z`。
-- 本文档中的版本描述与应用仓库实际声明版本不一致时，以代码声明版本为准，并尽快修正文档。
+- `iterlife-reunion` 与 `iterlife-reunion-ui` 当前稳定在线为 `1.1.x`。
+- `iterlife-expenses` 与 `iterlife-expenses-ui` 当前正式版本线统一为 `1.1.0`。
+- `iterlife-idaas` 与 `iterlife-idaas-ui` 当前仍处于 `0.1.0-SNAPSHOT` 开发阶段。
+- 历史 `openclaw-expenses_v*` 标签仅保留追溯价值，不再作为当前标准版本线。
+
+### 7.3 发布治理规则
+
+- 任一应用变更版本号、发布标签或发布状态时，优先更新代码声明，再同步更新本文档。
+- 文档与代码声明不一致时，以业务仓库中的代码版本声明为准。
+- 不再单独维护平行的版本矩阵文档，避免重复事实源。
 
 ## 8. 当前服务映射
 
-| Service | 运行配置 | 业务仓库目录 | 主要职责 |
+| Service | 运行配置 | 关联仓库 | 主要职责 |
 | --- | --- | --- | --- |
-| `iterlife-reunion-api` | `/apps/config/iterlife-reunion/backend.env` | `/apps/iterlife-reunion` | 内容查询、发布投影、评论与业务 webhook |
-| `iterlife-reunion-ui` | `/apps/config/iterlife-reunion/ui.env` | `/apps/iterlife-reunion-ui` | 阅读、评论和前端交互 |
-| `iterlife-expenses-api` | `/apps/config/iterlife-expenses/backend.env` | `/apps/iterlife-expenses` | 支出数据 API 与统计 |
-| `iterlife-expenses-ui` | `/apps/config/iterlife-expenses/ui.env` | `/apps/iterlife-expenses-ui` | 看板、图表与交互 |
-| `iterlife-idaas-api` | `/apps/config/iterlife-idaas/backend.env` | `/apps/iterlife-idaas` | 统一认证、会话和第三方登录 |
-| `iterlife-idaas-ui` | `/apps/config/iterlife-idaas/ui.env` | `/apps/iterlife-idaas-ui` | 登录、回调与会话中心 |
+| `iterlife-reunion-api` | `/apps/config/iterlife-reunion/backend.env` | `iterlife-reunion` | 内容查询、发布投影、评论与业务 webhook |
+| `iterlife-reunion-ui` | `/apps/config/iterlife-reunion/ui.env` | `iterlife-reunion-ui` | 阅读、评论和前端交互 |
+| `iterlife-expenses-api` | `/apps/config/iterlife-expenses/backend.env` | `iterlife-expenses` | 支出数据 API 与统计 |
+| `iterlife-expenses-ui` | `/apps/config/iterlife-expenses/ui.env` | `iterlife-expenses-ui` | 看板、图表与交互 |
+| `iterlife-idaas-api` | `/apps/config/iterlife-idaas/backend.env` | `iterlife-idaas` | 统一认证、会话和第三方登录 |
+| `iterlife-idaas-ui` | `/apps/config/iterlife-idaas/ui.env` | `iterlife-idaas-ui` | 登录、回调与会话中心 |
 
 ## 9. 服务器运行时路径
 
@@ -249,5 +264,69 @@ payload='{
 
 - webhook 返回 `401`：通常是 `ALIYUN_DEPLOY_WEBHOOK_SECRET` 与服务器 `WEBHOOK_SECRET` 不一致。
 - webhook 返回 `unsupported service`：通常是 `service` 未在 `config/deploy-targets.json` 注册。
-- 镜像已推送但容器未更新：优先检查 `compose_file`、`compose_service` 和容器 `Config.Image`。
+- 镜像已推送但容器未更新：优先检查 `compose_file`、`compose_service`、`runtime_image_env` 和容器 `Config.Image`。
 - 健康检查失败：优先检查 webhook 日志、容器日志和本地健康检查地址。
+
+## 16. 新服务接入模板
+
+新增服务接入统一控制面时，至少补齐以下信息：
+
+- 服务名称
+- 服务类型：`API / UI / Worker / Other`
+- 所属仓库
+- GHCR 镜像名
+- 运行配置目录
+- 健康检查地址
+
+### 16.1 必备控制面资产
+
+- `deploy/compose/<service>.yml`
+- `config/deploy-targets.json` 注册项
+- 对共享 reusable workflow 的引用
+- `.env.example` 或 `backend.env.example / ui.env.example`
+- 运行配置目录说明
+- 本文档中的服务矩阵与运行口径
+
+### 16.2 deploy target 模板
+
+```json
+{
+  "<service-name>": {
+    "compose_file": "/apps/iterlife-stack/deploy/compose/<service-file>.yml",
+    "compose_project_directory": "/apps/iterlife-stack",
+    "compose_service": "<service-name>",
+    "release_image_env": "API_IMAGE_REF",
+    "runtime_image_env": "RUNTIME_API_IMAGE_NAME",
+    "runtime_image_name": "<service-name>:prod",
+    "deployment_state_file": "/apps/logs/deploy-state/<service-name>.json",
+    "healthcheck_url": "http://127.0.0.1:<port>/<health-path>",
+    "compose_no_deps": true
+  }
+}
+```
+
+说明：
+
+- UI 服务可将 `release_image_env` / `runtime_image_env` 切换为 `UI_*`
+- `runtime_image_name` 应表达运行环境语义，不继续沿用 `:local`
+- 新注册项不再使用 `repo_dir` 一类业务源码目录依赖字段
+
+### 16.3 生产 compose 要求
+
+生产 compose 必须满足：
+
+- 使用镜像，不使用源码构建
+- 真实配置来自 `/apps/config/*`
+- 端口绑定明确
+- 健康检查可执行
+- 若有数据卷，路径必须明确
+
+### 16.4 接入完成定义
+
+只有当以下条件全部满足时，才可视为接入完成：
+
+- 文档完成
+- 控制面资产完成
+- 配置模板完成
+- 发布验证完成
+- 回滚验证完成
