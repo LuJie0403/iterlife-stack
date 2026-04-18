@@ -25,6 +25,7 @@
 - 宿主机对外入口：`/etc/nginx`
 - 控制面日志目录：`/apps/logs/webhook`
 - 部署状态目录：`/apps/logs/deploy-state`
+- 应用运行日志根目录：`/apps/logs`
 - 容器运行时：Docker / containerd
 - 部署触发服务：`iterlife-app-deploy-webhook.service`
 - 主机级核心服务：`mysqld`、`redis`、`squid`
@@ -70,6 +71,24 @@
 以上事实以 `/apps/iterlife-stack/config/deploy-targets.json` 为准。  
 运行中的实际镜像版本，以最近一次标准发布生成的部署状态文件和容器 `Config.Image` 为准。
 `config/deploy-targets.json` 中同一 `service` 不允许重复定义，避免保留被历史条目覆盖的伪基线。
+
+### 5.1 应用日志标准
+
+- 应用运行日志统一落在 `/apps/logs/<app>/<component>/`。
+- 前后端日志必须分离，不共用同一个目录或文件。
+- 日志文件必须按日期切分，命名统一为 `<service>-YYYY-MM-DD.log`。
+- 该标准同时适用于 `iterlife-reunion`、`iterlife-expenses`、`iterlife-idaas` 的前后端，以及后续新增项目。
+- 当前已落地的服务日志目录：
+  - `iterlife-reunion-api` -> `/apps/logs/iterlife-reunion/api/iterlife-reunion-api-YYYY-MM-DD.log`
+  - `iterlife-reunion-ui` -> `/apps/logs/iterlife-reunion/ui/iterlife-reunion-ui-YYYY-MM-DD.log`
+  - `iterlife-expenses-api` -> `/apps/logs/iterlife-expenses/api/iterlife-expenses-api-YYYY-MM-DD.log`
+  - `iterlife-expenses-ui` -> `/apps/logs/iterlife-expenses/ui/iterlife-expenses-ui-YYYY-MM-DD.log`
+  - `iterlife-idaas-api` -> `/apps/logs/iterlife-idaas/api/iterlife-idaas-api-YYYY-MM-DD.log`
+  - `iterlife-idaas-ui` -> `/apps/logs/iterlife-idaas/ui/iterlife-idaas-ui-YYYY-MM-DD.log`
+- Java 服务优先使用应用内 rolling file 策略；Node / Nuxt 服务优先使用容器内启动包装器将 stdout/stderr 汇总到按日文件。
+- Python API 与 Nginx 静态前端优先使用容器内日志包装器将 stdout/stderr 汇总到按日文件。
+- 默认保留期为 30 天；Java 服务默认总量上限为 `2GB`。
+- 新服务接入统一控制面时，必须同时补齐日志目录挂载、日志环境变量和本文档条目。
 
 ## 6. GitHub Actions 与 Secrets
 
@@ -160,6 +179,12 @@
 - webhook 真实 env：`/apps/config/iterlife-stack/iterlife-deploy-webhook.env`
 - webhook 日志目录：`/apps/logs/webhook`
 - 部署状态目录：`/apps/logs/deploy-state`
+- Reunion API 运行日志目录：`/apps/logs/iterlife-reunion/api`
+- Reunion UI 运行日志目录：`/apps/logs/iterlife-reunion/ui`
+- 花多少 API 运行日志目录：`/apps/logs/iterlife-expenses/api`
+- 花多少 UI 运行日志目录：`/apps/logs/iterlife-expenses/ui`
+- IDaaS API 运行日志目录：`/apps/logs/iterlife-idaas/api`
+- IDaaS UI 运行日志目录：`/apps/logs/iterlife-idaas/ui`
 - systemd unit：`/etc/systemd/system/iterlife-app-deploy-webhook.service`
 - systemd drop-in：`/etc/systemd/system/iterlife-app-deploy-webhook.service.d/`
 - 宿主机 Nginx 生效目录：`/etc/nginx`
@@ -197,6 +222,12 @@ GitHub Actions 侧：
 ```bash
 sudo systemctl status iterlife-app-deploy-webhook.service --no-pager
 tail -n 120 /apps/logs/webhook/iterlife-deploy-webhook-$(date +%F).log
+tail -n 120 /apps/logs/iterlife-reunion/api/iterlife-reunion-api-$(date +%F).log
+tail -n 120 /apps/logs/iterlife-reunion/ui/iterlife-reunion-ui-$(date +%F).log
+tail -n 120 /apps/logs/iterlife-expenses/api/iterlife-expenses-api-$(date +%F).log
+tail -n 120 /apps/logs/iterlife-expenses/ui/iterlife-expenses-ui-$(date +%F).log
+tail -n 120 /apps/logs/iterlife-idaas/api/iterlife-idaas-api-$(date +%F).log
+tail -n 120 /apps/logs/iterlife-idaas/ui/iterlife-idaas-ui-$(date +%F).log
 sudo docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.RunningFor}}\t{{.Image}}'
 find /apps/config -maxdepth 3 -type f | sort
 ```

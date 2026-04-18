@@ -8,6 +8,11 @@ services:
       - ${UI_ENV_FILE:-/apps/config/iterlife-reunion/ui.env}
     environment:
       TZ: ${TZ:-Asia/Shanghai}
+      APP_LOG_DIR: /apps/logs/iterlife-reunion/ui
+      APP_LOG_FILE_PREFIX: iterlife-reunion-ui
+      APP_LOG_RETENTION_DAYS: ${APP_LOG_RETENTION_DAYS:-30}
     restart: unless-stopped
+    volumes:
+      - /apps/logs/iterlife-reunion/ui:/apps/logs/iterlife-reunion/ui
     ports:
       - "${UI_BIND_HOST:-127.0.0.1}:${UI_PORT:-13080}:3000"

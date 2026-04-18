@@ -8,6 +8,11 @@ services:
       - ${UI_ENV_FILE:-/apps/config/iterlife-idaas/ui.env}
     environment:
       TZ: ${TZ:-Asia/Shanghai}
+      APP_LOG_DIR: /apps/logs/iterlife-idaas/ui
+      APP_LOG_FILE_PREFIX: iterlife-idaas-ui
+      APP_LOG_RETENTION_DAYS: ${APP_LOG_RETENTION_DAYS:-30}
     restart: unless-stopped
+    volumes:
+      - /apps/logs/iterlife-idaas/ui:/apps/logs/iterlife-idaas/ui
     ports:
       - "${UI_BIND_HOST:-127.0.0.1}:${UI_PORT:-13280}:3000"

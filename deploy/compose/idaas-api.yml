@@ -9,7 +9,13 @@ services:
     environment:
       TZ: ${TZ:-Asia/Shanghai}
       JAVA_TOOL_OPTIONS: -Duser.timezone=${TZ:-Asia/Shanghai} -Djdk.http.auth.tunneling.disabledSchemes=
+      APP_LOG_DIR: /apps/logs/iterlife-idaas/api
+      APP_LOG_FILE_PREFIX: iterlife-idaas-api
+      APP_LOG_RETENTION_DAYS: ${APP_LOG_RETENTION_DAYS:-30}
+      APP_LOG_TOTAL_SIZE_CAP: ${APP_LOG_TOTAL_SIZE_CAP:-2GB}
     restart: unless-stopped
+    volumes:
+      - /apps/logs/iterlife-idaas/api:/apps/logs/iterlife-idaas/api
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:

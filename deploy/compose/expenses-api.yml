@@ -8,7 +8,12 @@ services:
       - ${BACKEND_ENV_FILE:-/apps/config/iterlife-expenses/backend.env}
     environment:
       TZ: ${TZ:-Asia/Shanghai}
+      APP_LOG_DIR: /apps/logs/iterlife-expenses/api
+      APP_LOG_FILE_PREFIX: iterlife-expenses-api
+      APP_LOG_RETENTION_DAYS: ${APP_LOG_RETENTION_DAYS:-30}
     restart: unless-stopped
+    volumes:
+      - /apps/logs/iterlife-expenses/api:/apps/logs/iterlife-expenses/api
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:

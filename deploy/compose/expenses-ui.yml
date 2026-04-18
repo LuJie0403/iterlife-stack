@@ -8,8 +8,12 @@ services:
       - ${UI_ENV_FILE:-/apps/config/iterlife-expenses/ui.env}
     environment:
       TZ: ${TZ:-Asia/Shanghai}
+      APP_LOG_DIR: /apps/logs/iterlife-expenses/ui
+      APP_LOG_FILE_PREFIX: iterlife-expenses-ui
+      APP_LOG_RETENTION_DAYS: ${APP_LOG_RETENTION_DAYS:-30}
     volumes:
       - ${UI_RUNTIME_CONFIG_FILE:-/apps/config/iterlife-expenses/ui-runtime-config.js}:/usr/share/nginx/html/runtime-config.js:ro
+      - /apps/logs/iterlife-expenses/ui:/apps/logs/iterlife-expenses/ui
     restart: unless-stopped
     ports:
       - "${UI_BIND_HOST:-127.0.0.1}:${UI_PORT:-13180}:80"

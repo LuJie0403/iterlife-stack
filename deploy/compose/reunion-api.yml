@@ -9,7 +9,13 @@ services:
     environment:
       TZ: ${TZ:-Asia/Shanghai}
       JAVA_TOOL_OPTIONS: -Duser.timezone=${TZ:-Asia/Shanghai}
+      APP_LOG_DIR: /apps/logs/iterlife-reunion/api
+      APP_LOG_FILE_PREFIX: iterlife-reunion-api
+      APP_LOG_RETENTION_DAYS: ${APP_LOG_RETENTION_DAYS:-30}
+      APP_LOG_TOTAL_SIZE_CAP: ${APP_LOG_TOTAL_SIZE_CAP:-2GB}
     restart: unless-stopped
+    volumes:
+      - /apps/logs/iterlife-reunion/api:/apps/logs/iterlife-reunion/api
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
