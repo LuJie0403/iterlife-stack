@@ -108,11 +108,11 @@
 - 数据库结构变更、初始化数据变更和登录方式配置初始化，不再通过 Flyway 等运行时迁移框架自动执行。
 - 每次数据库变更都必须生成一份独立 SQL 文件，放在 `iterlife-stack/docs/sql/` 目录下。
 - SQL 文件命名统一使用下划线，固定形态为 `yyyymmdd_NNN_topic.sql`。
-- 其中 `NNN` 表示当天脚本批次内的执行顺序，每个日期都从 `000` 开始递增。
+- 其中 `NNN` 表示当天脚本批次内的执行顺序，每个日期都从 `01` 开始递增。
 - 提交 PR 时必须明确提示管理员手动执行对应 SQL 文件，并说明目标数据库与执行顺序。
 - 业务应用仓库中的运行时配置、依赖和启动链路，不应再包含自动改库机制。
 - 当前与 IDaaS 登录方式配置对应的人工执行脚本为：
-  - `docs/sql/20260419_000_idaas_provider_config.sql`
+  - `docs/sql/20260419_01_idaas_provider_config.sql`
 
 ## 6. GitHub Actions 与 Secrets
 

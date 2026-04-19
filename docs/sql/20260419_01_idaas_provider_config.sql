@@ -1,5 +1,5 @@
 -- IterLife IDaaS 数据库变更脚本
--- 文件：20260419_000_idaas_provider_config.sql
+-- 文件：20260419_01_idaas_provider_config.sql
 -- 适用库：iterlife_reunion
 -- 执行方式：管理员在生产或目标环境手动执行
 -- 说明：本脚本替代运行时 Flyway 迁移，负责补齐 reunion_user.signup_source

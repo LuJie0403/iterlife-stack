@@ -36,7 +36,7 @@ webhook/              webhook 服务源码与示例 env
 - [docs/reunion/reunion_design_overview.md](./docs/reunion/reunion_design_overview.md)
 - [docs/reunion/reunion_product_overview.md](./docs/reunion/reunion_product_overview.md)
 - [docs/expenses/expenses_design_overview.md](./docs/expenses/expenses_design_overview.md)
-- [docs/sql/20260419_000_idaas_provider_config.sql](./docs/sql/20260419_000_idaas_provider_config.sql)
+- [docs/sql/20260419_01_idaas_provider_config.sql](./docs/sql/20260419_01_idaas_provider_config.sql)
 
 `/docs` 是 IterLife 体系正式非代码文档与数据库人工执行脚本的单一事实源。跨应用文档直接放在 `/docs` 根目录，应用专属文档按 `expenses`、`reunion`、`idaas` 子目录规置；数据库变更脚本统一放在 `/docs/sql`。
 
@@ -48,7 +48,7 @@ webhook/              webhook 服务源码与示例 env
 - [docs/reunion/reunion_design_overview.md](./docs/reunion/reunion_design_overview.md)：Reunion API/UI 的统一系统概览。
 - [docs/reunion/reunion_product_overview.md](./docs/reunion/reunion_product_overview.md)：Reunion 当前产品定位、核心能力和优先级。
 - [docs/expenses/expenses_design_overview.md](./docs/expenses/expenses_design_overview.md)：花多少 API/UI 的统一系统概览。
-- [docs/sql/20260419_000_idaas_provider_config.sql](./docs/sql/20260419_000_idaas_provider_config.sql)：IDaaS 登录方式配置与账号来源字段的人工执行 SQL。
+- [docs/sql/20260419_01_idaas_provider_config.sql](./docs/sql/20260419_01_idaas_provider_config.sql)：IDaaS 登录方式配置与账号来源字段的人工执行 SQL。
 
 ## 文档治理规则
 
@@ -56,7 +56,7 @@ webhook/              webhook 服务源码与示例 env
 - 控制面 webhook 当前统一以 `/usr/local/bin/python3.11` 作为运行时，不依赖宿主机默认 `python3`。
 - 文件名统一使用 `app_optional_doctype_topic.md`，并统一使用下划线 `_` 作为分隔符。
 - 文档正文开头统一维护“创建日期”和“最后更新”；日期信息不再进入文件名。
-- SQL 文件统一使用 `yyyymmdd_NNN_topic.sql`；其中每个日期的 `NNN` 都从 `000` 开始，按当天执行顺序递增。
+- SQL 文件统一使用 `yyyymmdd_NNN_topic.sql`；其中每个日期的 `NNN` 都从 `01` 开始，按当天执行顺序递增。
 - 主标题和正文优先使用中文，直接描述当前状态和当前规则。
 - 同一主题只保留一个事实源；如果某条规则已经写入专门文档，其它地方只链接，不重复抄写。
 - `/docs` 只保留稳定资料；排查笔记、临时方案、迁移草稿不进入该目录。

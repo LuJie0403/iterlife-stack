@@ -51,7 +51,7 @@ webhook/              webhook 服务源码与示例环境文件
 
 - `/docs` 根目录只放跨应用文档；应用专属文档规置到 `docs/expenses/`、`docs/reunion/`、`docs/idaas/`。
 - `/docs/sql/` 只放数据库人工执行脚本；每次数据库变更都必须生成一份独立 SQL 文件放在该目录下，并在 PR 中明确提示管理员手动执行。
-- SQL 文件命名统一使用 `yyyymmdd_NNN_topic.sql`；其中每个日期的 `NNN` 都从 `000` 开始，按当天执行顺序递增。
+- SQL 文件命名统一使用 `yyyymmdd_NNN_topic.sql`；其中每个日期的 `NNN` 都从 `01` 开始，按当天执行顺序递增。
 - 文件名统一使用 `app_optional_doctype_topic.md`，统一使用下划线 `_` 作为分隔符。
 - 文档日期信息不再进入文件名；每份文档在正文开头显式记录“创建日期”和“最后更新”。
 - 数据库变更不再通过 Flyway 等运行时迁移框架管理；业务应用仓库不保留自动改库链路。

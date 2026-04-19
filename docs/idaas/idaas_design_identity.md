@@ -305,7 +305,7 @@
 
 ### 7.1 数据库脚本交付约束
 
-- `auth_provider_config` 与 `reunion_user.signup_source` 的数据库变更脚本统一放在 `../sql/20260419_000_idaas_provider_config.sql`。
+- `auth_provider_config` 与 `reunion_user.signup_source` 的数据库变更脚本统一放在 `../sql/20260419_01_idaas_provider_config.sql`。
 - 该类数据库脚本由管理员按 PR 说明手动执行，业务应用运行时不自动改库。
 
 ## 8. 当前接入状态
