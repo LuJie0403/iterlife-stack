@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/local/bin/python3.11
 """Webhook receiver for IterLife multi-app production deployment.
 
 This service accepts signed webhook callbacks and triggers image-based

@@ -1,6 +1,7 @@
 # 统一部署与运维
 
-最后更新：2026-04-18
+创建日期：2026-04-17
+最后更新：2026-04-19
 
 本文档是 IterLife 当前统一部署与运维事实源，覆盖服务器基准状态、发布链路、版本基线、配置与 Secrets、服务映射、服务接入、例行巡检、回滚与排障入口。此前分散在多份 `operations_*` 根目录文档中的稳定结论，已经统一收敛到本文件。
 
@@ -27,8 +28,14 @@
 - 部署状态目录：`/apps/logs/deploy-state`
 - 应用运行日志根目录：`/apps/logs`
 - 容器运行时：Docker / containerd
+- webhook Python 运行时：`/usr/local/bin/python3.11`
 - 部署触发服务：`iterlife-app-deploy-webhook.service`
 - 主机级核心服务：`mysqld`、`redis`、`squid`
+
+补充约束：
+
+- `iterlife-stack` 本身是宿主机上的控制面仓库与正式文档事实源，不作为独立业务容器部署。
+- 当前统一 Docker 部署矩阵仅覆盖业务应用前后端服务，不包含 `iterlife-stack` 自身。
 
 ## 3. 标准发布路径
 
@@ -46,6 +53,7 @@
 - 服务器 `git pull` 后源码构建发布。
 - 手工触发生产 release workflow。
 - 业务仓库自带的生产部署 shell。
+- 业务应用在启动时通过 Flyway 等运行时迁移框架自动改库。
 
 ## 4. 控制面关键资产
 
@@ -56,6 +64,7 @@
 - `webhook/iterlife-deploy-webhook.env.example`
 - `systemd/iterlife-app-deploy-webhook.service`
 - `.github/workflows/reusable-release-ghcr-webhook.yml`
+- `docs/sql/*.sql`
 
 ## 5. 当前控制面部署矩阵
 
@@ -71,6 +80,8 @@
 以上事实以 `/apps/iterlife-stack/config/deploy-targets.json` 为准。  
 运行中的实际镜像版本，以最近一次标准发布生成的部署状态文件和容器 `Config.Image` 为准。
 `config/deploy-targets.json` 中同一 `service` 不允许重复定义，避免保留被历史条目覆盖的伪基线。
+
+`iterlife-stack` 不在上表中，是因为它承担宿主机控制面仓库职责，而不是对外提供 HTTP 业务能力的独立容器服务。
 
 ### 5.1 应用日志标准
 
@@ -91,6 +102,17 @@
 - 新服务接入统一控制面时，必须同时补齐日志目录挂载、日志环境变量和本文档条目。
 - 若宿主机 `/apps/logs/<app>/<component>/` 为空，但 `docker logs <container>` 持续有输出，优先检查运行中容器是否实际带有 `APP_LOG_DIR`、`APP_LOG_FILE_PREFIX` 和对应 bind mount。
 - 对 Java 服务，若未注入 `APP_LOG_DIR`，logback 会回退到容器工作目录下的 `./logs/<service>-YYYY-MM-DD.log`；这属于控制面编排未生效，不属于应用本身未产生日志。
+
+### 5.2 数据库变更管理标准
+
+- 数据库结构变更、初始化数据变更和登录方式配置初始化，不再通过 Flyway 等运行时迁移框架自动执行。
+- 每次数据库变更都必须生成一份独立 SQL 文件，放在 `iterlife-stack/docs/sql/` 目录下。
+- SQL 文件命名统一使用下划线，固定形态为 `yyyymmdd_NNN_topic.sql`。
+- 其中 `NNN` 表示当天脚本批次内的执行顺序，每个日期都从 `01` 开始递增。
+- 提交 PR 时必须明确提示管理员手动执行对应 SQL 文件，并说明目标数据库与执行顺序。
+- 业务应用仓库中的运行时配置、依赖和启动链路，不应再包含自动改库机制。
+- 当前与 IDaaS 登录方式配置对应的人工执行脚本为：
+  - `docs/sql/20260419_01_idaas_provider_config.sql`
 
 ## 6. GitHub Actions 与 Secrets
 
@@ -198,6 +220,7 @@
 cd /apps
 git clone git@github.com:LuJie0403/iterlife-stack.git /apps/iterlife-stack
 cd /apps/iterlife-stack
+test -x /usr/local/bin/python3.11
 mkdir -p /apps/config/iterlife-stack
 cp webhook/iterlife-deploy-webhook.env.example \
   /apps/config/iterlife-stack/iterlife-deploy-webhook.env
@@ -252,6 +275,12 @@ curl -fsS http://127.0.0.1:13280
 1. 先确认本文档中的服务器基准状态和服务矩阵。
 2. 再核对 `/apps/config`、`deploy-targets.json` 和当前容器状态。
 3. 最后查看 webhook 日志和控制面脚本输出。
+
+关于控制面仓库写权限：
+
+- 生产控制面仓库不应被当作日常可写工作区，这仍是治理方向。
+- 但当前阶段不对 `/apps/iterlife-stack` 额外施加 Git push 限制或只读机制，避免在尚未完成控制面收敛前引入新的运维风险。
+- 相关权限硬化属于低优先级治理项，后续如需执行，应通过独立方案评估后再落地。
 
 建议的只读巡检命令：
 
