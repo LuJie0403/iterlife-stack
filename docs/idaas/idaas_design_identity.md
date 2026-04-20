@@ -1,7 +1,7 @@
 # 统一身份管理设计
 
 创建日期：2026-04-19
-最后更新：2026-04-19
+最后更新：2026-04-20
 
 本文档统一描述 IterLife 当前统一身份层的定位、能力边界、核心模型，以及登录页的目标交互设计。
 
@@ -227,18 +227,19 @@
 
 - Authentication 解决“你是谁”和“当前会话是否有效”。
 - Authorization 解决“你能访问什么资源、执行什么操作”。
+- 认证相关物理表统一使用 `authenticate_*` 前缀；权限相关物理表统一使用 `authorize_*` 前缀。
 - 当前优先完成统一认证和统一会话，授权模型继续按业务演进。
 
 ### 5.4 首次登录建档原则
 
-- 每一种登录方式在首次成功认证后，都必须创建对应的 `reunion_user` 主档。
-- 不允许只创建 `user_identity` 而没有主账户主档。
-- 用户名密码注册用户与第三方登录用户，最终都必须归一到 `reunion_user`。
-- 若后续存在账户绑定，则是在已有 `reunion_user` 上追加新的 `user_identity`，而不是跳过主档。
+- 每一种登录方式在首次成功认证后，都必须创建对应的 `user_account` 主档。
+- 不允许只创建 `authenticate_identity` 而没有主账户主档。
+- 用户名密码注册用户与第三方登录用户，最终都必须归一到 `user_account`。
+- 若后续存在账户绑定，则是在已有 `user_account` 上追加新的 `authenticate_identity`，而不是跳过主档。
 
 ## 6. 第三方身份模型扩展原则
 
-- `user_identity` 继续作为所有第三方登录方式的统一绑定表。
+- `authenticate_identity` 继续作为所有第三方登录方式的统一绑定表。
 - 新 provider 按统一命名纳入：
   - `github`
   - `google`
@@ -258,7 +259,7 @@
 
 ### 6.1 账号来源标注要求
 
-- 每个新建的 `reunion_user` 都必须标注其首个来源。
+- 每个新建的 `user_account` 都必须标注其首个来源。
 - 首个来源至少覆盖：
   - `password`
   - `github`
@@ -270,15 +271,15 @@
   - `alipay`
   - `weixin`
 - 该“来源”用于识别该账号最初是通过哪种方式进入系统，而不是当前最后一次登录方式。
-- 推荐在 `reunion_user` 主档中增加稳定字段，例如 `signup_source` / `origin_provider`，而不是只把来源埋在 `profile_json`。
-- `user_identity` 继续承载多 provider 绑定关系；`reunion_user` 承载首个来源事实。
+- 推荐在 `user_account` 主档中增加稳定字段，例如 `signup_source` / `origin_provider`，而不是只把来源埋在 `profile_json`。
+- `authenticate_identity` 继续承载多 provider 绑定关系；`user_account` 承载首个来源事实。
 - 若后续用户再绑定其他 provider，不应覆盖主档的首个来源字段。
 
 ## 7. 核心数据对象
 
-- `reunion_user`
-- `user_identity`
-- `user_session`
+- `user_account`
+- `authenticate_identity`
+- `authenticate_session`
 - `authorize_role`
 - `authorize_permission`
 - `user_role`
@@ -286,7 +287,7 @@
 
 推荐新增配置对象：
 
-- `auth_provider_config`
+- `authenticate_provider_config`
 
 建议至少包含：
 
@@ -305,7 +306,7 @@
 
 ### 7.1 数据库脚本交付约束
 
-- `auth_provider_config` 与 `reunion_user.signup_source` 的数据库变更脚本统一放在 `../sql/20260419_01_idaas_provider_config.sql`。
+- `authenticate_provider_config`、`authenticate_identity`、`authenticate_session` 与 `user_account` 的数据库变更脚本统一放在 `../sql/20260420_01_authenticate_tables.sql`。
 - 该类数据库脚本由管理员按 PR 说明手动执行，业务应用运行时不自动改库。
 
 ## 8. 当前接入状态
@@ -324,6 +325,6 @@
 - 支付宝扫码作为国内主流扫码登录方式，与微信扫码并列纳入设计。
 - 每种登录方式的启用状态与页面显隐，都由数据库配置控制，当前阶段直接改数据库，不先做管理界面。
 - 微信扫码采用桌面二维码弹层优先的交互，不与普通 OAuth 图标跳转完全等同。
-- 每种登录方式首次成功后都必须创建 `reunion_user`，并标注该账号的首个来源。
+- 每种登录方式首次成功后都必须创建 `user_account`，并标注该账号的首个来源。
 - 登录页页脚必须与 `iterlife-reunion-ui` 完全一致，并优先通过复用实现保持升级一致性。
 - 未真实可用的注册、忘记密码或 provider 入口，不在页面展示。

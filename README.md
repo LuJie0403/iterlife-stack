@@ -36,7 +36,7 @@ webhook/              webhook 服务源码与示例 env
 - [docs/reunion/reunion_design_overview.md](./docs/reunion/reunion_design_overview.md)
 - [docs/reunion/reunion_product_overview.md](./docs/reunion/reunion_product_overview.md)
 - [docs/expenses/expenses_design_overview.md](./docs/expenses/expenses_design_overview.md)
-- [docs/sql/20260419_01_idaas_provider_config.sql](./docs/sql/20260419_01_idaas_provider_config.sql)
+- [docs/sql/20260420_01_authenticate_tables.sql](./docs/sql/20260420_01_authenticate_tables.sql)
 
 `/docs` 是 IterLife 体系正式非代码文档与数据库人工执行脚本的单一事实源。跨应用文档直接放在 `/docs` 根目录，应用专属文档按 `expenses`、`reunion`、`idaas` 子目录规置；数据库变更脚本统一放在 `/docs/sql`。
 
@@ -48,7 +48,7 @@ webhook/              webhook 服务源码与示例 env
 - [docs/reunion/reunion_design_overview.md](./docs/reunion/reunion_design_overview.md)：Reunion API/UI 的统一系统概览。
 - [docs/reunion/reunion_product_overview.md](./docs/reunion/reunion_product_overview.md)：Reunion 当前产品定位、核心能力和优先级。
 - [docs/expenses/expenses_design_overview.md](./docs/expenses/expenses_design_overview.md)：花多少 API/UI 的统一系统概览。
-- [docs/sql/20260419_01_idaas_provider_config.sql](./docs/sql/20260419_01_idaas_provider_config.sql)：IDaaS 登录方式配置与账号来源字段的人工执行 SQL。
+- [docs/sql/20260420_01_authenticate_tables.sql](./docs/sql/20260420_01_authenticate_tables.sql)：认证主表、会话表、登录方式配置表与账号来源字段的人工执行 SQL。
 
 ## 文档治理规则
 
