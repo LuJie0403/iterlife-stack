@@ -1,7 +1,7 @@
 # 花多少系统概览
 
 创建日期：2026-04-18
-最后更新：2026-04-18
+最后更新：2026-04-20
 
 本文档统一描述花多少 API/UI 的当前结构、部署方式和治理要点。正式文档在 `iterlife-stack/docs/expenses/` 内继续收敛为本概览文档，不再拆回仓库内 `README / deploy / archive` 一组平行文档。
 
@@ -73,7 +73,8 @@
 ## 6. 数据与安全约束
 
 - 默认数据库：`iterlife_reunion`
-- 默认用户表：`reunion_user`
+- 默认用户表：`user_account`
+- 统一认证相关基表：`user_account`、`authenticate_identity`、`authenticate_session`、`authenticate_provider_config`
 - 默认明细表：`expenses_item`
 - 默认类型表：`expenses_type`
 - token 使用 JWT，payload 包含 `sub` 与 `user_id`
