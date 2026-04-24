@@ -170,7 +170,7 @@ VALUES
     ('google', 1, 1, 20, 'oauth_redirect', 'oauth_redirect'),
     ('github', 1, 1, 30, 'oauth_redirect', 'oauth_redirect'),
     ('apple', 0, 0, 40, 'oauth_redirect', 'oauth_redirect'),
-    ('weixin', 1, 0, 50, 'qr_popup', 'hidden'),
+    ('weixin', 1, 1, 50, 'qr_popup', 'hidden'),
     ('microsoft', 0, 0, 60, 'oauth_redirect', 'oauth_redirect'),
     ('x', 0, 0, 70, 'oauth_redirect', 'oauth_redirect'),
     ('facebook', 0, 0, 80, 'oauth_redirect', 'oauth_redirect'),

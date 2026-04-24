@@ -121,6 +121,8 @@
   - `docs/sql/20260424_03_provider_identity_alignment.sql`
 - 当前与 IDaaS 账号来源字段、身份 provider 字段和授权关联列名收口对应的人工执行脚本为：
   - `docs/sql/20260424_04_account_schema_alignment.sql`
+- 若生产环境已部署新代码，但 `authenticate_identity.user_id`、`authenticate_session.user_id`、`authenticate_provider_config` 等旧结构仍未完全清理，执行残留补救脚本：
+  - `docs/sql/20260424_05_auth_schema_residual_repair.sql`
 - IDaaS 当前会话运行基线：
   - 默认有效期 12 小时
   - 剩余有效期不超过 4 小时时允许自动滚动续期 12 小时
