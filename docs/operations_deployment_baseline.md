@@ -115,6 +115,10 @@
   - `docs/sql/20260420_01_authenticate_tables.sql`
 - 当前与 IDaaS 会话认证来源字段对应的人工执行脚本为：
   - `docs/sql/20260424_01_authenticate_session_source.sql`
+- IDaaS 当前会话运行基线：
+  - 默认有效期 12 小时
+  - 剩余有效期不超过 4 小时时允许自动滚动续期 12 小时
+  - 同一账号新登录成功后自动使旧会话全局失效
 
 ## 6. GitHub Actions 与 Secrets
 
