@@ -53,7 +53,7 @@
 
 - API 与 UI 属于一个业务系统，正式文档不再拆成多级目录分别维护。
 - 当前最重要的结构复杂点在后端配置分为运行时配置和初始化脚本配置两套入口。
-- 当前主线仍保留本地用户名密码 + JWT 登录实现，后续继续向统一身份体系收敛。
+- 当前主线仍保留本地账号密码 + JWT 登录实现，后续继续向统一身份体系收敛。
 - 正式版本、发布标签与发布状态只在 `../operations_deployment_baseline.md` 维护。
 - 历史 PR 描述、仓库内部署参考和阶段性归档不再进入正式文档集合。
 
@@ -74,10 +74,10 @@
 
 - 默认数据库：`iterlife_reunion`
 - 默认用户表：`user_account`
-- 统一认证相关基表：`user_account`、`authenticate_identity`、`authenticate_session`、`authenticate_provider_config`
+- 统一认证相关基表：`user_account`、`authenticate_identity`、`authenticate_session`、`authenticate_client`、`authenticate_provider`
 - 默认明细表：`expenses_item`
 - 默认类型表：`expenses_type`
-- token 使用 JWT，payload 包含 `sub` 与 `user_id`
+- token 使用 JWT，payload 至少包含 `sub(account_id)` 与 `session_id`
 - 生产环境要求显式设置 `SECRET_KEY`
 - `DB_NAME=iterlife_reunion` 属于当前代码中的历史沿用默认值，不代表花多少与 Reunion 共用同一业务边界。
 
