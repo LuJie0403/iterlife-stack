@@ -115,6 +115,12 @@
   - `docs/sql/20260420_01_authenticate_tables.sql`
 - 当前与 IDaaS 会话认证来源字段对应的人工执行脚本为：
   - `docs/sql/20260424_01_authenticate_session_source.sql`
+- 当前与 IDaaS 账号中心模型、认证客户端与业务键重命名对应的人工执行脚本为：
+  - `docs/sql/20260424_02_account_centric_auth_model.sql`
+- 当前与 IDaaS 账号来源字段、会话 provider 字段和 provider 表重命名对应的人工执行脚本为：
+  - `docs/sql/20260424_03_provider_identity_alignment.sql`
+- 当前与 IDaaS 账号来源字段、身份 provider 字段和授权关联列名收口对应的人工执行脚本为：
+  - `docs/sql/20260424_04_account_schema_alignment.sql`
 - IDaaS 当前会话运行基线：
   - 默认有效期 12 小时
   - 剩余有效期不超过 4 小时时允许自动滚动续期 12 小时

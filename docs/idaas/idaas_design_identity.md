@@ -9,14 +9,14 @@
 
 ## 1. 当前定位
 
-`iterlife-idaas` / `iterlife-idaas-ui` 是 IterLife 的统一身份层，负责承载用户、认证（含第三方登录认证及会话）、权限（功能权限及数据权限）管理等。
+`iterlife-idaas` / `iterlife-idaas-ui` 是 IterLife 的统一身份层，负责承载账号、认证（含第三方登录认证及会话）、权限（功能权限及数据权限）管理等。
 
 ## 2. 目标边界
 
 ### `iterlife-idaas`
 
 负责：
-- 用户管理
+- 账号管理
 - 统一认证（含账号管理、本地及第三方认证、会话管理等）
 - access token / refresh token 签发与刷新
 - 账户主档与身份绑定
@@ -37,13 +37,13 @@
 
 - 业务 API
 - 验证来自 `iterlife-idaas` 的 token
-- 基于用户标识和权限做业务授权
+- 基于账号标识和权限做业务授权
 
 ## 3. 当前能力边界
 
 当前认证方式：
 
-- 用户名密码
+- 账号密码
 - GitHub
 - Google
 - 微信 PC 扫码
@@ -54,7 +54,7 @@
 
 本轮设计目标支持的认证方式：
 
-- 用户名密码
+- 账号密码
 - Google
 - GitHub
 - X
@@ -67,7 +67,7 @@
 当前会话能力：
 
 - access token / refresh token
-- 当前用户信息查询
+- 当前账号信息查询
 - 会话列表
 - 会话登出（一次登出，全局失效）
 
@@ -107,7 +107,7 @@
   - 当未来确实开放自助注册后，再切换为注册入口文案。
 - 除网站官方名称 `壹零贰肆老友记` 外，默认所有用户可见文案使用英文，除非有明确的中文呈现要求。
 - 表单区只保留两个输入项：
-  - `Email or username`
+  - `Account`
   - `Password`
 - 表单下方只在真实能力存在时展示辅助入口：
   - 若已上线找回密码，则展示 `Forgot password?`
@@ -131,7 +131,7 @@
 
 ### 4.4 各登录方式的交互约束
 
-- 用户名密码：
+- 账号密码：
   - 仍然作为首屏默认路径
   - 输入框使用内嵌图标和弱边框，弱化后台系统感
 - GitHub / Google / Apple / Microsoft / X / Facebook：
@@ -214,9 +214,11 @@
 
 ### 5.1 主体原则
 
-- 统一账户主档优先于认证切换。
-- 统一身份层负责账户主档、身份绑定和会话状态。
-- 业务系统不再承担全局身份 token 签发职责。
+- 当前阶段 `iterlife-idaas` 暂时不引入“用户”概念，只处理“账号”。
+- 每一种成功的登录方式都对应一个账号；账号统一落在 `user_account`。
+- `authenticate_*` 表只处理认证事实，不承担权限含义。
+- `authorize_*` 表只处理权限事实，不承担认证含义。
+- 任何业务关联都不得使用没有业务含义的内部自增 `id`，统一使用显式业务键。
 
 ### 5.2 会话原则
 
@@ -225,77 +227,83 @@
 - 会话必须可撤销、可审计、可单端退出和全端退出。
 - 当登录后没有客户端回调地址时，Session 页面是默认兜底回跳页。
 - Session 页面必须显示该条会话的认证方式，例如 `password`、`google`、`github`、`weixin`。
+- Session 页面必须显示该条会话由哪个客户端发起，例如 `iterlife-reunion`、`iterlife-expenses` 或 `iterlife-idaas`。
 - 会话默认有效期为 12 小时。
 - 当会话剩余有效期不超过 4 小时时，系统可在用户仍活跃的情况下自动滚动续期 12 小时。
 - 同一账号新登录成功后，旧的有效会话自动全局失效，只保留最新会话继续使用。
 
 ### 5.3 认证与授权分层
 
-- Authentication 解决“你是谁”和“当前会话是否有效”。
-- Authorization 解决“你能访问什么资源、执行什么操作”。
-- 认证相关物理表统一使用 `authenticate_*` 前缀；权限相关物理表统一使用 `authorize_*` 前缀。
-- 当前优先完成统一认证和统一会话，授权模型继续按业务演进。
+- Authentication 解决“当前是哪个账号发起认证”和“当前会话是否有效”。
+- Authorization 解决“当前账号可以访问什么资源、执行什么操作”。
+- 认证相关物理表统一使用 `authenticate_*` 前缀，配合账户主表 `user_account`。
+- 权限相关物理表统一使用 `authorize_*` 前缀。
+- `authorize_role_permission` 不再使用内部自增字段做业务关联，统一切到 `rold_code` 与 `permission_code`。
 
 ### 5.4 首次登录建档原则
 
 - 每一种登录方式在首次成功认证后，都必须创建对应的 `user_account` 主档。
-- 不允许只创建 `authenticate_identity` 而没有主账户主档。
-- 用户名密码注册用户与第三方登录用户，最终都必须归一到 `user_account`。
+- 不允许只创建 `authenticate_identity` 而没有账号主档。
+- 密码登录、Google、GitHub、微信、支付宝及后续 provider，最终都必须归一到 `user_account`。
 - 若后续存在账户绑定，则是在已有 `user_account` 上追加新的 `authenticate_identity`，而不是跳过主档。
 
-## 6. 第三方身份模型扩展原则
+## 6. 账号与身份模型
 
-- `authenticate_identity` 继续作为所有第三方登录方式的统一绑定表。
-- 新 provider 按统一命名纳入：
-  - `github`
-  - `google`
-  - `apple`
-  - `microsoft`
-  - `x`
-  - `facebook`
-  - `alipay`
-  - `weixin`
-- 每个 provider 至少统一收敛以下字段：
-  - `provider`
-  - `provider_subject`
-  - `provider_login`
-  - `provider_email`
-  - `profile_json`
-- 微信扫码虽然交互不同，但落库模型仍与其他第三方身份保持一致。
+### 6.1 账号主档
 
-### 6.1 账号来源标注要求
+- `user_account` 是统一账户主档。
+- 业务主键为 `account_id`，表示账号本身，可为字符串形式、邮箱形式或后续手机号形式。
+- `account_name` 是账户名，用于展示和人类可读识别。
+- `display_name` 是展示名称。
+- `identity_id` 记录该账号首次进入系统时对应的身份记录，关联 `authenticate_identity.identity_id`。
+- 当前阶段不再在 `user_account` 中保留账号邮箱概念；邮箱属于认证身份侧的 provider 信息，而不是账户主档的一部分。
 
-- 每个新建的 `user_account` 都必须标注其首个来源。
-- 首个来源至少覆盖：
-  - `password`
-  - `github`
-  - `google`
-  - `apple`
-  - `microsoft`
-  - `x`
-  - `facebook`
-  - `alipay`
-  - `weixin`
-- 该“来源”用于识别该账号最初是通过哪种方式进入系统，而不是当前最后一次登录方式。
-- 推荐在 `user_account` 主档中增加稳定字段，例如 `signup_source` / `origin_provider`，而不是只把来源埋在 `profile_json`。
-- `authenticate_identity` 继续承载多 provider 绑定关系；`user_account` 承载首个来源事实。
-- 若后续用户再绑定其他 provider，不应覆盖主档的首个来源字段。
+### 6.2 认证身份
+
+- `authenticate_identity` 是所有认证方式的统一身份表。
+- 业务主键为 `identity_id`。
+- `account_id` 关联 `user_account.account_id`。
+- `provider_code` 记录认证方式，例如 `password`、`google`、`github`、`weixin`、`alipay`。
+- `provider_subject` 记录第三方侧稳定主体。
+- `provider_login` 记录第三方返回的可读登录名。
+- `provider_email` 仅表示该 provider 返回的邮箱资料，不代表账号主档邮箱。
+- `profile_json` 保存第三方原始资料快照。
+
+### 6.3 认证会话
+
+- `authenticate_session` 是统一会话表。
+- 业务主键为 `session_id`。
+- `account_id` 关联 `user_account.account_id`。
+- `provider_code` 记录本次会话的认证提供方。
+- `client` 记录本次认证是由哪个客户端发起。
+- `client_type` 不再保留在会话表中，而统一由 `authenticate_client` 管理。
+
+### 6.4 认证客户端
+
+- `authenticate_client` 是认证客户端注册表。
+- 业务主键为 `client_code`。
+- `client_name` 记录对外名称。
+- `client_type` 记录客户端类型，仅表示 `WEB`、`IOS`、`ANDROID`、`MINI_PROGRAM` 等运行形态。
+- 当前首批客户端至少包括：
+  - `iterlife-idaas`
+  - `iterlife-reunion`
+  - `iterlife-expenses`
 
 ## 7. 核心数据对象
 
 - `user_account`
 - `authenticate_identity`
 - `authenticate_session`
+- `authenticate_client`
+- `authenticate_provider`
 - `authorize_role`
 - `authorize_permission`
 - `user_role`
 - `authorize_role_permission`
 
-推荐新增配置对象：
+### 7.1 Provider 配置对象
 
-- `authenticate_provider_config`
-
-建议至少包含：
+`authenticate_provider` 至少包含：
 
 - `provider_code`
 - `enabled`
@@ -310,27 +318,114 @@
 - `desktop_mode` 可用于区分 `oauth_redirect` / `qr_popup`
 - `mobile_mode` 可用于区分 `oauth_redirect` / `in_app_auth` / `hidden`
 
-### 7.1 数据库脚本交付约束
+### 7.2 数据库脚本交付约束
 
-- `authenticate_provider_config`、`authenticate_identity`、`authenticate_session` 与 `user_account` 的数据库变更脚本统一放在 `../sql/20260420_01_authenticate_tables.sql`。
-- 该类数据库脚本由管理员按 PR 说明手动执行，业务应用运行时不自动改库。
+- 数据库变更脚本统一放在 `../sql/` 下。
+- 账户主档与认证表初始重命名基线脚本：`../sql/20260420_01_authenticate_tables.sql`
+- 会话认证来源补充脚本：`../sql/20260424_01_authenticate_session_source.sql`
+- 账号中心模型、认证客户端与业务键重命名脚本：`../sql/20260424_02_account_centric_auth_model.sql`
+- 账号来源、会话提供方与 provider 表重命名脚本：`../sql/20260424_03_provider_identity_alignment.sql`
+- 账号来源、身份 provider 字段与授权关联列名收口脚本：`../sql/20260424_04_account_schema_alignment.sql`
+- 所有脚本由管理员按 PR 说明手动执行，业务应用运行时不自动改库。
 
-## 8. 当前接入状态
+## 8. 完整领域模型 / E-R 图
+
+```mermaid
+erDiagram
+    user_account ||--o{ authenticate_identity : "owns"
+    user_account ||--o{ authenticate_session : "opens"
+    authenticate_client ||--o{ authenticate_session : "originates"
+    authorize_role ||--o{ user_role : "grants"
+    authorize_role ||--o{ authorize_role_permission : "contains"
+    authorize_permission ||--o{ authorize_role_permission : "maps"
+
+    user_account {
+        bigint id
+        string account_id
+        string account_name
+        string display_name
+        string password_hash
+        string identity_id
+        string status
+    }
+
+    authenticate_identity {
+        bigint id
+        string identity_id
+        string account_id
+        string provider_code
+        string provider_subject
+        string provider_login
+        string provider_email
+        json profile_json
+    }
+
+    authenticate_session {
+        bigint id
+        string session_id
+        string account_id
+        string provider_code
+        string client
+        string refresh_token_hash
+        string status
+        datetime expires_at
+    }
+
+    authenticate_client {
+        bigint id
+        string client_code
+        string client_name
+        string client_type
+        boolean enabled
+    }
+
+    authenticate_provider {
+        bigint id
+        string provider_code
+        boolean enabled
+        boolean visible
+        int display_order
+        string desktop_mode
+        string mobile_mode
+    }
+
+    authorize_role {
+        bigint id
+        string rold_code
+        string role_name
+    }
+
+    authorize_permission {
+        bigint id
+        string permission_code
+        string permission_name
+    }
+
+    authorize_role_permission {
+        bigint id
+        string rold_code
+        string permission_code
+    }
+
+    user_role {
+        bigint id
+        string account_id
+        string rold_code
+    }
+```
+
+## 9. 当前接入状态
 
 - `reunion` 已具备统一登录入口、会话中心入口和统一登出接口。
-- `expenses` 当前主线仍保留本地 JWT 登录实现，后续继续向统一身份收敛。
+- `expenses` 正在从旧的本地登录字段向统一账户模型收敛。
 - 版本、发布与运维基线统一收敛在 `../operations_deployment_baseline.md`。
 
-## 9. 本轮设计结论
+## 10. 本轮设计结论
 
-- 登录页整体改为轻量、单卡片、移动优先风格。
-- 密码登录保留，但视觉上与第三方登录彻底分层。
-- 第三方登录从大按钮改为图标化入口。
-- 新增设计支持 Apple、Microsoft、X、Facebook、支付宝扫码和微信扫码。
-- 微信扫码当前已实现但默认隐藏，本轮设计确认后再随简化登录页一起开放。
-- 支付宝扫码作为国内主流扫码登录方式，与微信扫码并列纳入设计。
+- 登录页面和统一身份模型都以“账号”为中心，而不是“用户”为中心。
+- 登录页只负责输入登录信息或发起第三方登录；没有回调地址时，Session 页面是兜底结果页。
+- Session 页面必须展示认证提供方与发起客户端。
+- 第三方登录中转页只负责无停留处理，不向用户渲染停留页面。
 - 每种登录方式的启用状态与页面显隐，都由数据库配置控制，当前阶段直接改数据库，不先做管理界面。
-- 微信扫码采用桌面二维码弹层优先的交互，不与普通 OAuth 图标跳转完全等同。
-- 每种登录方式首次成功后都必须创建 `user_account`，并标注该账号的首个来源。
-- 登录页页脚必须与 `iterlife-reunion-ui` 完全一致，并优先通过复用实现保持升级一致性。
-- 未真实可用的注册、忘记密码或 provider 入口，不在页面展示。
+- 登录方式顺序也由数据库 `display_order` 决定。
+- 所有业务关联不得依赖内部 `id`，统一使用 `account_id`、`identity_id`、`session_id`、`client_code`、`provider_code`、`rold_code`、`permission_code`。
