@@ -210,11 +210,20 @@
 
 ### 5.1 主体原则
 
-- 当前阶段 `iterlife-idaas` 暂时不引入“用户”概念，只处理“账号”。
-- 每一种成功的登录方式都对应一个账号；账号统一落在 `user_account`。
+- 从本轮开始，`iterlife-idaas` 正式引入“用户”概念。
+- 用户（`user_profile`，正式表名）是自然人主体；账号（`user_account`）是该用户可用于登录的一个登录入口。
+- 一个用户可以拥有多个账号；一个账号只能归属一个用户。
+- 每一种可独立登录的方式最终都必须归一到一个 `user_account`；多个 `user_account` 再统一归属到一个 `user_profile`。
 - `authenticate_*` 表只处理认证事实，不承担权限含义。
 - `authorize_*` 表只处理权限事实，不承担认证含义。
 - 任何业务关联都不得使用没有业务含义的内部自增 `id`，统一使用显式业务键。
+- 用户的唯一识别基线不是邮箱、手机号或第三方 subject，而是：
+  - 所属国家/地区
+  - 证件类型
+  - 证件号码
+- 出于安全与合规要求，证件号码在存储层不应只保存明文：
+  - 需要保存可检索的哈希值用于唯一约束
+  - 需要保存受保护的密文或脱敏副本用于展示和审计
 
 ### 5.2 会话原则
 
@@ -238,43 +247,95 @@
 
 ### 5.4 首次登录建档原则
 
-- 每一种登录方式在首次成功认证后，都必须创建对应的 `user_account` 主档。
+- 每一种登录方式在首次成功认证后，都必须先归属到一个 `user_profile`，再创建或关联对应的 `user_account`。
 - 不允许只创建 `authenticate_identity` 而没有账号主档。
-- 密码登录、Google、GitHub、微信、支付宝及后续 provider，最终都必须归一到 `user_account`。
-- 若后续存在账户绑定，则是在已有 `user_account` 上追加新的 `authenticate_identity`，而不是跳过主档。
+- 不允许只创建 `user_account` 而没有所属 `user_profile`。
+- 密码登录、Google、GitHub、微信、支付宝、X 及后续 provider，最终都必须归一到：
+  - `user_profile`
+  - `user_account`
+  - `authenticate_identity`
+- 若后续存在账户绑定，则是在已有 `user_profile` 下新增或关联 `user_account`，并为该账号新增对应的 `authenticate_identity`。
+- 系统不得仅凭邮箱相同或昵称相同自动把第三方账号并入已有用户；用户归并必须经过显式确认和校验。
 
-## 6. 账号与身份模型
+## 6. 用户、账号与认证模型
 
-### 6.1 账号主档
+### 6.1 用户主档
+
+- 新增 `user_profile` 作为统一用户主档。
+- 业务主键为 `user_id`。
+- `user_profile` 是本轮确认后的正式用户主表命名，不使用过于泛化的 `user`。
+- 用户是自然人主体，唯一识别基线为：
+  - `country_region_code`
+  - `certificate_type`
+  - `certificate_number_hash`
+- `certificate_number_hash` 用于唯一约束和查重。
+- `certificate_number_ciphertext` 或同等受保护字段用于受控读取和审计。
+- 在第一阶段落地中，历史账号和首次第三方登录可先创建“待补全”用户主档，因此上述证件识别字段允许暂时为空。
+- 当用户完成资料补全后，再对 `country_region_code + certificate_type + certificate_number_hash` 执行完整唯一识别约束。
+- `user_name` 记录用户名称。
+- `phone_country_code` 与 `phone_number` 记录用户手机号。
+- `email` 记录用户电子邮箱。
+- 上述手机号、邮箱属于“用户联系信息”，不是账号主键。
+- 用户状态使用 `status` 管理，例如 `ACTIVE`、`DISABLED`、`LOCKED`。
+
+### 6.1.1 国家字典表
+
+- 新增 `system_country` 作为统一国家/地区配置表。
+- `system_country` 不只是手机号区号字典，还承担用户主档国家/地区、手机号国家区号、证件归属国家等基础配置来源。
+- 建议业务主键为 `country_code`，例如 `CN`、`US`。
+- 至少包含：
+  - `country_code`
+  - `country_name`
+  - `country_name_zh`
+  - `country_short_name`
+  - `phone_code`
+  - `iso3_code`
+  - `default_locale`
+  - `status`
+  - `display_order`
+- `user_profile.country_region_code` 应关联 `system_country.country_code`。
+- 后续若要扩展“某国家支持哪些证件类型、证件规则如何校验”，可在 `system_country` 基础上继续拆分国家证件规则表。
+
+### 6.2 账号主档
 
 - `user_account` 是统一账户主档。
-- 业务主键为 `account_id`，表示账号本身，可为字符串形式、邮箱形式或后续手机号形式。
+- 一个 `user_profile` 可以拥有多个 `user_account`。
+- `user_account` 必须新增 `user_id`，关联 `user_profile.user_id`。
+- 业务主键为 `account_id`，表示一个可登录账号本身。
 - `account_name` 是账户名，用于展示和人类可读识别。
-- `display_name` 是展示名称。
-- `identity_id` 记录该账号首次进入系统时对应的身份记录，关联 `authenticate_identity.identity_id`。
-- 当前阶段不再在 `user_account` 中保留账号邮箱概念；邮箱属于认证身份侧的 provider 信息，而不是账户主档的一部分。
+- `display_name` 是该账号层的展示名称，可与用户名称不同。
+- `identity_id` 记录该账号首次进入系统时对应的认证身份，关联 `authenticate_identity.identity_id`。
+- 当前阶段账号仍可表现为：
+  - 本地账号名
+  - 邮箱型账号
+  - 手机号型账号
+  - 第三方账号映射后的平台账号
+- 账号是“登录载体”，用户是“主体归属”。
 
-### 6.2 认证身份
+### 6.3 认证身份
 
 - `authenticate_identity` 是所有认证方式的统一身份表。
 - 业务主键为 `identity_id`。
 - `account_id` 关联 `user_account.account_id`。
-- `provider_code` 记录认证方式，例如 `password`、`google`、`github`、`weixin`、`alipay`。
-- `provider_subject` 记录第三方侧稳定主体。
+- 一个 `user_account` 可以拥有多条 `authenticate_identity`，但每条身份只归属一个账号。
+- `provider_code` 记录认证方式，例如 `password`、`google`、`github`、`weixin`、`alipay`、`x`。
+- `provider_subject` 记录第三方侧稳定主体，例如 OAuth provider 的 subject / openid。
 - `provider_login` 记录第三方返回的可读登录名。
-- `provider_email` 仅表示该 provider 返回的邮箱资料，不代表账号主档邮箱。
+- `provider_email` 仅表示该 provider 返回的邮箱资料，不代表用户主档邮箱或账号主档邮箱。
 - `profile_json` 保存第三方原始资料快照。
+- `authenticate_identity` 只回答“这个账号可通过哪种认证方式进入系统”，不回答“这个自然人是谁”。
 
-### 6.3 认证会话
+### 6.4 认证会话
 
 - `authenticate_session` 是统一会话表。
 - 业务主键为 `session_id`。
 - `account_id` 关联 `user_account.account_id`。
+- 会话通过账号解析到所属用户，不直接把用户表做成唯一登录入口。
 - `provider_code` 记录本次会话的认证提供方。
 - `client` 记录本次认证是由哪个客户端发起。
 - `client_type` 不再保留在会话表中，而统一由 `authenticate_client` 管理。
 
-### 6.4 认证客户端
+### 6.5 认证客户端
 
 - `authenticate_client` 是认证客户端注册表。
 - 业务主键为 `client_code`。
@@ -287,6 +348,8 @@
 
 ## 7. 核心数据对象
 
+- `user_profile`
+- `system_country`
 - `user_account`
 - `authenticate_identity`
 - `authenticate_session`
@@ -314,7 +377,21 @@
 - `desktop_mode` 可用于区分 `oauth_redirect` / `qr_popup`
 - `mobile_mode` 可用于区分 `oauth_redirect` / `in_app_auth` / `hidden`
 
-### 7.2 数据库脚本交付约束
+### 7.2 用户与账号唯一约束
+
+- `user_profile`
+  - 业务唯一键：`user_id`
+  - 自然人唯一约束：`country_region_code + certificate_type + certificate_number_hash`
+- `system_country`
+  - 业务唯一键：`country_code`
+- `user_account`
+  - 业务唯一键：`account_id`
+  - `account_name` 应全局唯一或至少在可登录范围内唯一
+- `authenticate_identity`
+  - 业务唯一键：`identity_id`
+  - `provider_code + provider_subject` 必须唯一，防止同一个第三方身份绑定到多个账号
+
+### 7.3 数据库脚本交付约束
 
 - 数据库变更脚本统一放在 `../sql/` 下。
 - 账户主档与认证表初始重命名基线脚本：`../sql/20260420_01_authenticate_tables.sql`
@@ -322,21 +399,111 @@
 - 账号中心模型、认证客户端与业务键重命名脚本：`../sql/20260424_02_account_centric_auth_model.sql`
 - 账号来源、会话提供方与 provider 表重命名脚本：`../sql/20260424_03_provider_identity_alignment.sql`
 - 账号来源、身份 provider 字段与授权关联列名收口脚本：`../sql/20260424_04_account_schema_alignment.sql`
+- 用户主档、国家字典与历史账号回填脚本：`../sql/20260426_01_user_profile_and_country.sql`
 - 所有脚本由管理员按 PR 说明手动执行，业务应用运行时不自动改库。
+- `20260426_01_user_profile_and_country.sql` 已包含 `system_country` 初始化数据、`user_profile` 建表和历史 `user_account.user_id` 回填。
 
-## 8. 完整领域模型 / E-R 图
+## 8. 登录与绑定流程设计
+
+### 8.1 本地账号密码登录
+
+1. 用户输入 `Account Name` 与密码。
+2. 系统先解析登录输入，定位 `user_account`。
+3. 再通过 `authenticate_identity(provider_code = password)` 校验该账号的本地密码身份。
+4. 登录成功后，创建 `authenticate_session`，会话挂在 `account_id` 上。
+5. 业务系统可通过 `account_id -> user_id` 再解析出所属用户。
+
+### 8.2 首次第三方登录
+
+1. 第三方 provider 回调后，系统拿到 `provider_code + provider_subject`。
+2. 若 `authenticate_identity` 已存在，则直接找到对应 `account_id`，再定位所属 `user_profile`。
+3. 若 `authenticate_identity` 不存在，则进入“创建或关联用户”流程：
+   - 若当前存在已登录会话且用户在用户中心发起绑定，则直接绑定到当前用户。
+   - 若当前无登录会话，则进入首次建档流程。
+4. 首次建档流程必须支持两条路径：
+   - 关联已有用户
+   - 新建用户
+
+### 8.3 关联已有用户
+
+- 不允许仅凭第三方邮箱自动合并已有用户。
+- 关联已有用户至少需要以下一种强校验方式：
+  - 已有账号密码验证
+  - 已有手机号 OTP 验证
+  - 已有邮箱 OTP 验证
+  - 已登记证件信息核验
+- 关联成功后：
+  - 在目标 `user_profile` 下创建新的 `user_account`
+  - 为该账号写入新的 `authenticate_identity`
+
+### 8.4 新建用户
+
+- 若系统确认是首次进入平台的新主体，则创建：
+  - `user_profile`
+  - `user_account`
+  - `authenticate_identity`
+- 新建用户至少采集：
+  - 所属国家/地区
+  - 证件类型
+  - 证件号码
+  - 用户名称
+- 手机号码、邮箱可在首次建档或后续用户中心补充。
+
+### 8.5 用户中心绑定能力
+
+- 用户中心需要新增“已绑定账号/登录方式”管理面板。
+- 用户中心至少支持：
+  - 查看当前用户下的全部 `user_account`
+  - 查看每个账号下绑定的 `authenticate_identity`
+  - 绑定新的 GitHub / Google / X / 微信 / 支付宝账号
+  - 解除绑定已有第三方账号
+  - 为用户新增本地账号
+- 解除绑定必须受约束：
+  - 不允许把用户最后一个可用登录账号解绑掉
+  - 不允许解绑当前唯一管理员依赖账号而导致失控
+
+## 9. 完整领域模型 / E-R 图
 
 ```mermaid
 erDiagram
-    user_account ||--o{ authenticate_identity : "owns"
+    system_country ||--o{ user_profile : "classifies"
+    user_profile ||--o{ user_account : "owns"
+    user_account ||--o{ authenticate_identity : "binds"
     user_account ||--o{ authenticate_session : "opens"
     authenticate_client ||--o{ authenticate_session : "originates"
     authorize_role ||--o{ user_role : "grants"
     authorize_role ||--o{ authorize_role_permission : "contains"
     authorize_permission ||--o{ authorize_role_permission : "maps"
 
+    system_country {
+        bigint id
+        string country_code
+        string country_name
+        string country_name_zh
+        string country_short_name
+        string phone_code
+        string iso3_code
+        string default_locale
+        string status
+    }
+
+    user_profile {
+        bigint id
+        string user_id
+        string user_name
+        string country_region_code
+        string certificate_type
+        string certificate_number_hash
+        string certificate_number_ciphertext
+        string phone_country_code
+        string phone_number
+        string email
+        string status
+    }
+
     user_account {
         bigint id
+        string user_id
         string account_id
         string account_name
         string display_name
@@ -405,23 +572,55 @@ erDiagram
 
     user_role {
         bigint id
-        string account_id
+        string user_id
         string rold_code
     }
 ```
 
-## 9. 当前接入状态
+## 10. 分阶段实施建议
+
+### 10.1 第一阶段：Schema 落地
+
+- 新增 `system_country`
+- 新增 `user_profile`
+- `user_account` 增加 `user_id`
+- 建立 `system_country -> user_profile -> user_account -> authenticate_identity` 链路
+- 为现有账户生成一对一用户主档，完成历史数据回填
+
+### 10.2 第二阶段：登录链路切换
+
+- 本地账号登录切到 `账号 -> 用户` 解析模型
+- 第三方登录新增“创建或关联用户”分支
+- 会话接口补齐 `user_id` 级别的可观测信息
+
+### 10.3 第三阶段：用户中心绑定能力
+
+- 用户中心展示“用户信息 + 账号列表 + 已绑定认证方式”
+- 支持绑定/解绑 GitHub、Google、X、微信等账号
+- 支持新增本地账号、手机号账号、邮箱账号
+
+### 10.4 第四阶段：授权模型收口
+
+- `user_role` 从当前偏账号语义调整为用户主体语义
+- 权限判定优先围绕 `user_id` 建模
+- 业务系统保留 `account_id` 作为登录上下文标识，但权限归属逐步向 `user_id` 收口
+
+## 11. 当前接入状态
 
 - `reunion` 已具备统一登录入口、会话中心入口和统一登出接口。
 - `expenses` 正在从旧的本地登录字段向统一账户模型收敛。
 - 版本、发布与运维基线统一收敛在 `../operations_deployment_baseline.md`。
 
-## 10. 本轮设计结论
+## 12. 本轮设计结论
 
-- 登录页面和统一身份模型都以“账号”为中心，而不是“用户”为中心。
-- 登录页只负责输入登录信息或发起第三方登录；没有回调地址时，Session 页面是兜底结果页。
+- 统一身份层从“仅账号模型”升级为“用户 + 账号 + 认证身份”三层模型。
+- 国家/地区基础字典正式采用 `system_country` 作为统一配置表。
+- 用户是自然人主体，账号是登录载体，认证身份是具体认证方式。
+- 一个用户可拥有多个账号，一个账号可绑定多个认证身份。
+- 用户唯一识别基线是“国家/地区 + 证件类型 + 证件号码”，而不是邮箱或手机号。
+- 第三方首次登录不得自动按邮箱并户，必须走“关联已有用户或新建用户”的显式流程。
+- 用户中心后续需要承担账号绑定与解绑能力。
+- 登录页仍只负责输入登录信息或发起第三方登录；没有回调地址时，Session 页面是兜底结果页。
 - Session 页面必须展示认证提供方与发起客户端。
-- 第三方登录中转页只负责无停留处理，不向用户渲染停留页面。
 - 每种登录方式的启用状态与页面显隐，都由数据库配置控制，当前阶段直接改数据库，不先做管理界面。
-- 登录方式顺序也由数据库 `display_order` 决定。
-- 所有业务关联不得依赖内部 `id`，统一使用 `account_id`、`identity_id`、`session_id`、`client_code`、`provider_code`、`rold_code`、`permission_code`。
+- 所有业务关联不得依赖内部 `id`，统一使用 `user_id`、`account_id`、`identity_id`、`session_id`、`client_code`、`provider_code`、`rold_code`、`permission_code`。
