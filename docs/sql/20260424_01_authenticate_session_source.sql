@@ -6,7 +6,7 @@
 --   1. 为 authenticate_session 增加 authenticate_source 字段；
 --   2. 为历史会话按 user_account.signup_source 做一次最佳努力回填；
 --   3. 新版本 IDaaS 会在新建会话时写入精确来源（password / google / github / weixin ...）。
---   4. 新版本 IDaaS 会在新登录成功时自动使旧会话失效，并在会话临近到期时执行 12 小时滚动续期。
+--   4. 新版本 IDaaS 会在新登录成功时自动使旧会话失效，并在会话临近到期时按配置执行滚动续期。
 
 SET @has_authenticate_source := (
     SELECT COUNT(*)

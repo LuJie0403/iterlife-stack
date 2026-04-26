@@ -124,8 +124,10 @@
 - 若生产环境已部署新代码，但 `authenticate_identity.user_id`、`authenticate_session.user_id`、`authenticate_provider_config` 等旧结构仍未完全清理，执行残留补救脚本：
   - `docs/sql/20260424_05_auth_schema_residual_repair.sql`
 - IDaaS 当前会话运行基线：
-  - 默认有效期 12 小时
-  - 剩余有效期不超过 4 小时时允许自动滚动续期 12 小时
+  - 默认有效期 8 小时
+  - 剩余有效期不超过 4 小时时允许自动滚动续期 8 小时
+  - 连续自动续期次数默认不超过 10 次
+  - 会话时长、续期窗口、最大续期次数均由应用配置控制
   - 同一账号新登录成功后自动使旧会话全局失效
 
 ## 6. GitHub Actions 与 Secrets
