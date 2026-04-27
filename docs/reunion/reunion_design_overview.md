@@ -1,7 +1,7 @@
 # Reunion 系统概览
 
 创建日期：2026-04-11
-最后更新：2026-04-18
+最后更新：2026-04-27
 
 本文档统一描述 Reunion 当前的系统结构、文章发布链路、身份接入方式和阅读侧边界。
 
@@ -84,7 +84,7 @@ Reunion 当前由两个应用组成：
 - `GET /api/auth/session-center-url`
 - `GET /api/auth/me`
 - `POST /api/auth/logout`
-- `POST /api/auth/logout-all`
+- `POST /api/auth/logout-current-client`
 - `POST /api/comment/publish`
 - `GET /api/comment/article/{articleId}`
 

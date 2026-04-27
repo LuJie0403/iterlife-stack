@@ -64,7 +64,6 @@
 - `webhook/iterlife-deploy-webhook.env.example`
 - `systemd/iterlife-app-deploy-webhook.service`
 - `.github/workflows/reusable-release-ghcr-webhook.yml`
-- `docs/sql/*.sql`
 
 ## 5. 当前控制面部署矩阵
 
@@ -106,29 +105,18 @@
 ### 5.2 数据库变更管理标准
 
 - 数据库结构变更、初始化数据变更和登录方式配置初始化，不再通过 Flyway 等运行时迁移框架自动执行。
-- 每次数据库变更都必须生成一份独立 SQL 文件，放在 `iterlife-stack/docs/sql/` 目录下。
-- SQL 文件命名统一使用下划线，固定形态为 `yyyymmdd_NNN_topic.sql`。
-- 其中 `NNN` 表示当天脚本批次内的执行顺序，每个日期都从 `01` 开始递增。
+- 每个业务仓都在自己的 `database/` 目录下维护最终版人工执行 SQL。
+- 控制面仓不再保留数据库过程脚本、补丁草稿或历史收口脚本。
 - 提交 PR 时必须明确提示管理员手动执行对应 SQL 文件，并说明目标数据库与执行顺序。
 - 业务应用仓库中的运行时配置、依赖和启动链路，不应再包含自动改库机制。
-- 当前与 IDaaS 认证表重命名和登录方式配置对应的人工执行脚本为：
-  - `docs/sql/20260420_01_authenticate_tables.sql`
-- 当前与 IDaaS 会话认证来源字段对应的人工执行脚本为：
-  - `docs/sql/20260424_01_authenticate_session_source.sql`
-- 当前与 IDaaS 账号中心模型、认证客户端与业务键重命名对应的人工执行脚本为：
-  - `docs/sql/20260424_02_account_centric_auth_model.sql`
-- 当前与 IDaaS 账号来源字段、会话 provider 字段和 provider 表重命名对应的人工执行脚本为：
-  - `docs/sql/20260424_03_provider_identity_alignment.sql`
-- 当前与 IDaaS 账号来源字段、身份 provider 字段和授权关联列名收口对应的人工执行脚本为：
-  - `docs/sql/20260424_04_account_schema_alignment.sql`
-- 若生产环境已部署新代码，但 `authenticate_identity.user_id`、`authenticate_session.user_id`、`authenticate_provider_config` 等旧结构仍未完全清理，执行残留补救脚本：
-  - `docs/sql/20260424_05_auth_schema_residual_repair.sql`
-- IDaaS 当前会话运行基线：
-  - 默认有效期 8 小时
-  - 剩余有效期不超过 4 小时时允许自动滚动续期 8 小时
-  - 连续自动续期次数默认不超过 10 次
+- 当前 IDaaS 最终迁移脚本位于：
+  - `iterlife-idaas/database/20260427_01_account_auth_baseline.sql`
+- 当前 IDaaS 会话运行基线：
+  - 默认有效期 12 小时
+  - 剩余有效期不超过 4 小时时允许自动滚动续期 12 小时
+  - 连续自动续期次数默认不超过 100 次
   - 会话时长、续期窗口、最大续期次数均由应用配置控制
-  - 同一账号新登录成功后自动使旧会话全局失效
+  - 同一账号同一端新登录成功后，仅使该端旧会话失效
 
 ## 6. GitHub Actions 与 Secrets
 

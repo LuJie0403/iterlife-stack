@@ -1,7 +1,7 @@
 # 花多少系统概览
 
 创建日期：2026-04-18
-最后更新：2026-04-20
+最后更新：2026-04-27
 
 本文档统一描述花多少 API/UI 的当前结构、部署方式和治理要点。正式文档在 `iterlife-stack/docs/expenses/` 内继续收敛为本概览文档，不再拆回仓库内 `README / deploy / archive` 一组平行文档。
 
@@ -53,7 +53,7 @@
 
 - API 与 UI 属于一个业务系统，正式文档不再拆成多级目录分别维护。
 - 当前最重要的结构复杂点在后端配置分为运行时配置和初始化脚本配置两套入口。
-- 当前主线仍保留本地账号密码 + JWT 登录实现，后续继续向统一身份体系收敛。
+- 当前认证主线已经切换为对接 `iterlife-idaas` 的统一身份体系。
 - 正式版本、发布标签与发布状态只在 `../operations_deployment_baseline.md` 维护。
 - 历史 PR 描述、仓库内部署参考和阶段性归档不再进入正式文档集合。
 
@@ -77,11 +77,11 @@
 - 统一认证相关基表：`user_account`、`authenticate_identity`、`authenticate_session`、`authenticate_client`、`authenticate_provider`
 - 默认明细表：`expenses_item`
 - 默认类型表：`expenses_type`
-- token 使用 JWT，payload 至少包含 `sub(account_id)` 与 `session_id`
+- 前端透传 `X-Token`，后端通过调用 IDaaS 上下文接口获取当前用户与当前账号信息
 - 生产环境要求显式设置 `SECRET_KEY`
 - `DB_NAME=iterlife_reunion` 属于当前代码中的历史沿用默认值，不代表花多少与 Reunion 共用同一业务边界。
 
 ## 7. 当前边界
 
 - 发布基线与运维事实统一收敛在 `../operations_deployment_baseline.md`。
-- 认证主线仍处在本地 JWT 向统一身份体系的收敛过程中。
+- 认证与会话的正式基线以 `iterlife-idaas` 为准，本系统不再维护独立 JWT 事实源。
