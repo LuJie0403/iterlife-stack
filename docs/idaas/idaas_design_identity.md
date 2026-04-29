@@ -1,7 +1,7 @@
 # IterLife IDaaS 最新设计基线
 
 创建日期：2026-04-27
-最后更新：2026-04-27
+最后更新：2026-04-29
 
 本文档是 IterLife 统一身份体系的唯一正式设计事实源。
 
@@ -176,3 +176,364 @@
 - 代码与数据库迁移的最终事实源分别保留在业务仓：
   - `iterlife-idaas`
   - `iterlife-idaas-ui`
+
+## 9. Apple / Microsoft / X 接入实施清单
+
+当前版本中，`apple`、`microsoft`、`x` 仅完成了配置占位与前端图标展示，尚未完成完整后端接入。正式改造必须按以下顺序推进。
+
+### 9.1 后端代码改造点清单
+
+#### 9.1.1 配置层
+
+- 在 `iterlife-idaas` 的 `IdaasProperties` 中保留并稳定以下配置：
+  - `apple.clientId`
+  - `apple.clientSecret`
+  - `apple.redirectUri`
+  - `apple.authorizeUrl`
+  - `apple.tokenUrl`
+  - `apple.userInfoUrl`
+  - `apple.scope`
+  - `microsoft.clientId`
+  - `microsoft.clientSecret`
+  - `microsoft.redirectUri`
+  - `microsoft.authorizeUrl`
+  - `microsoft.tokenUrl`
+  - `microsoft.userInfoUrl`
+  - `microsoft.scope`
+  - `x.clientId`
+  - `x.clientSecret`
+  - `x.redirectUri`
+  - `x.authorizeUrl`
+  - `x.tokenUrl`
+  - `x.userInfoUrl`
+  - `x.scope`
+- `application.yml` 必须继续保留对应环境变量映射。
+- Apple 若采用动态 `client_secret`，则后续需扩展：
+  - `teamId`
+  - `keyId`
+  - `privateKey`
+  - `audience`
+
+#### 9.1.2 Provider 可用性判定
+
+- 改造 `AuthService.isProviderConfigured(...)`。
+- `apple`、`microsoft`、`x` 只有在核心配置完整时才返回 `available = true`。
+- `listProviders()` 返回值中的：
+  - `visible` 只表示“是否展示”
+  - `enabled` 表示“是否允许使用”
+  - `available` 表示“后端配置是否完整且实现是否可调用”
+
+#### 9.1.3 OAuth 服务实现
+
+- 新增 `AppleOAuthService`
+- 新增 `MicrosoftOAuthService`
+- 新增 `XOAuthService`
+
+每个服务都必须统一提供：
+
+- `buildAuthorizeUrl(state)`
+- `authenticate(code)`
+
+并统一返回 `ExternalIdentityProfile`，至少包含：
+
+- `subject`
+- `login`
+- `email`
+- `preferredUserName`
+
+#### 9.1.4 AuthService 接入点
+
+- 在 `providerAuthorizeUrl(...)` 中增加：
+  - `apple -> appleOAuthService.buildAuthorizeUrl(state)`
+  - `microsoft -> microsoftOAuthService.buildAuthorizeUrl(state)`
+  - `x -> xOAuthService.buildAuthorizeUrl(state)`
+- 在 `authenticateProvider(...)` 中增加：
+  - `apple -> appleOAuthService.authenticate(code)`
+  - `microsoft -> microsoftOAuthService.authenticate(code)`
+  - `x -> xOAuthService.authenticate(code)`
+- 不允许为登录和绑定分别维护两套 provider 分支逻辑。
+- 登录与绑定必须继续复用当前统一链路：
+  - 首次登录：自动创建 `User + Account + Identity + Session`
+  - 再次登录：按 identity 找账号并创建会话
+  - 绑定：在当前用户下新建账号并绑定该 identity
+
+#### 9.1.5 平台差异处理要求
+
+##### Apple
+
+- `provider_subject` 使用 Apple `sub`
+- `provider_login` 优先使用邮箱前缀
+- 如首次授权未返回邮箱，则回退为 `apple_<短码>`
+- Apple 返回姓名和邮箱可能只有首次授权可见，必须允许后续回调数据不完整
+- 如采用动态 `client_secret`，必须在服务端生成签名 JWT，不直接依赖静态常量
+
+##### Microsoft
+
+- 建议先按 `common` 或单租户模式实现
+- `provider_subject` 使用 OIDC `sub` 或稳定用户 ID
+- `provider_login` 优先使用 `userPrincipalName`
+- `provider_email` 允许从 `mail` 或 `userPrincipalName` 回退
+
+##### X
+
+- `provider_subject` 使用 X 用户 ID
+- `provider_login` 使用 X username
+- `provider_email` 允许为空
+- 必须接受“X 平台无法稳定返回邮箱”的业务现实
+
+#### 9.1.6 出网与代理
+
+- 若生产继续通过 AWS HTTP 代理出网，必须补齐以下域名访问能力：
+  - Apple 授权与 token 域名
+  - Microsoft 登录与 Graph 域名
+  - X 授权、token、userinfo 域名
+- `ApacheOAuthHttpClient` 的域名匹配规则必须覆盖这些域名及其子域。
+- 联调前必须先验证代理链路，否则会出现“授权页可打开，但 token exchange 超时”的问题。
+
+#### 9.1.7 错误处理与日志
+
+- 每个 provider 失败时必须区分以下错误类型：
+  - provider 未启用
+  - provider 不可见但被直接调用
+  - provider 配置不完整
+  - token exchange 失败
+  - userinfo 获取失败
+  - third-party account already linked
+- 错误日志中必须带上 provider 名称，便于生产定位。
+
+#### 9.1.8 测试要求
+
+- `listProviders()` 的 `visible / enabled / available` 组合测试
+- 三个平台授权地址生成测试
+- 三个平台 token exchange / userinfo 解析测试
+- 首次登录自动建档测试
+- 已存在 identity 再次登录测试
+- 绑定当前用户时新建账号测试
+- 重复绑定失败测试
+
+## 10. 数据库配置 SQL 草案
+
+以下 SQL 用于初始化或修正 `authenticate_provider` 中的 `apple`、`microsoft`、`x` 配置。正式执行前，应根据生产环境实际 `display_order` 与展示策略调整。
+
+```sql
+INSERT INTO authenticate_provider (
+    provider_code,
+    enabled,
+    visible,
+    display_order,
+    desktop_mode,
+    mobile_mode,
+    status,
+    created_at,
+    updated_at
+) VALUES
+    ('apple',     0, 0, 50, 'oauth_redirect', 'oauth_redirect', 'ACTIVE', NOW(), NOW()),
+    ('microsoft', 0, 0, 60, 'oauth_redirect', 'oauth_redirect', 'ACTIVE', NOW(), NOW()),
+    ('x',         0, 0, 70, 'oauth_redirect', 'oauth_redirect', 'ACTIVE', NOW(), NOW())
+ON DUPLICATE KEY UPDATE
+    enabled      = VALUES(enabled),
+    visible      = VALUES(visible),
+    display_order = VALUES(display_order),
+    desktop_mode = VALUES(desktop_mode),
+    mobile_mode  = VALUES(mobile_mode),
+    status       = VALUES(status),
+    updated_at   = NOW();
+```
+
+建议的投产策略：
+
+- 初次落库时：
+  - `enabled = 0`
+  - `visible = 0`
+- 单个平台联调完成后：
+  - 先改 `enabled = 1`
+  - 完成预发或生产联调后，再改 `visible = 1`
+- 若只想灰度隐藏但保留能力：
+  - `enabled = 1`
+  - `visible = 0`
+
+单个平台开启示例：
+
+```sql
+UPDATE authenticate_provider
+SET enabled = 1,
+    visible = 1,
+    updated_at = NOW()
+WHERE provider_code = 'apple';
+```
+
+排序约束：
+
+- 登录首页与用户中心绑定入口的排序必须统一使用 `display_order`
+- `password` 固定由独立逻辑优先展示
+- 其余 provider 按 `authenticate_provider.display_order` 升序排列
+
+## 11. 前端显示规则修改清单
+
+### 11.1 登录首页
+
+- 数据来源统一为 `/api/auth/providers`
+- 展示条件改为：
+  - `visible = true` 时才展示
+- 可点击条件改为：
+  - `enabled = true`
+  - `available = true`
+- 如 `visible = true` 但 `available = false`：
+  - 允许展示为禁用态，文案提示“暂不可用”
+  - 或由前端继续过滤；但必须与产品口径保持一致
+- 排序规则：
+  - `password` 单独处理
+  - 其余 provider 统一按 `display_order`
+
+### 11.2 用户中心绑定入口
+
+- `Associated Account` 中未绑定的 provider，来源也统一为 `/api/auth/providers`
+- 是否展示必须由 `authenticate_provider.visible` 决定
+- 不允许前端单独硬编码 `apple / microsoft / x` 的展示开关
+- 可点击条件必须与登录首页一致：
+  - `enabled = true`
+  - `available = true`
+- 排序必须与登录首页一致
+
+### 11.3 已绑定账号展示
+
+- 已绑定 provider 继续来自 `/api/auth/user-center`
+- 若 provider 已绑定，则显示已绑定条目
+- 若 provider 未绑定但 `visible = true`，则显示可绑定入口
+- 若 provider `visible = false`，则登录页与用户中心绑定入口都不展示
+- 用户中心中的密码账号继续固定显示在第一位
+
+### 11.4 前端交互约束
+
+- 点击未绑定 provider 图标，即进入绑定流程
+- 点击已绑定 provider 不进入绑定流程
+- 若 provider 被展示但不可点击，必须有明确禁用态
+- 登录页与用户中心不得出现同一 provider 在一个页面显示、另一个页面不显示的规则漂移
+
+## 12. 推荐实施顺序
+
+1. 完成 `IdaasProperties` 与 `isProviderConfigured(...)` 收口
+2. 完成 `AppleOAuthService`
+3. 完成 `MicrosoftOAuthService`
+4. 完成 `XOAuthService`
+5. 接入 `AuthService` 的授权地址与回调认证分支
+6. 补齐 `authenticate_provider` 初始化数据
+7. 调整前端为“按 visible 展示，按 available / enabled 控制可点击”
+8. 联调代理与生产出网
+9. 单个平台逐步打开 `visible`
+
+## 13. 生产配置清单与执行顺序
+
+以下内容是 `apple`、`microsoft`、`x` 上线前必须满足的生产基线。
+
+### 13.1 后端环境变量清单
+
+#### Apple
+
+- `APPLE_CLIENT_ID`
+- `APPLE_CLIENT_SECRET`
+- `APPLE_REDIRECT_URI`
+- `APPLE_AUTHORIZE_URL`
+- `APPLE_TOKEN_URL`
+- `APPLE_SCOPE`
+
+当前实现中：
+
+- `APPLE_AUTHORIZE_URL` 默认值：`https://appleid.apple.com/auth/authorize`
+- `APPLE_TOKEN_URL` 默认值：`https://appleid.apple.com/auth/token`
+- `APPLE_SCOPE` 建议先保持为空，避免当前前端回调页与 Apple `form_post` 模式冲突
+
+#### Microsoft
+
+- `MICROSOFT_CLIENT_ID`
+- `MICROSOFT_CLIENT_SECRET`
+- `MICROSOFT_REDIRECT_URI`
+- `MICROSOFT_AUTHORIZE_URL`
+- `MICROSOFT_TOKEN_URL`
+- `MICROSOFT_USER_INFO_URL`
+- `MICROSOFT_SCOPE`
+
+默认推荐：
+
+- `MICROSOFT_AUTHORIZE_URL=https://login.microsoftonline.com/common/oauth2/v2.0/authorize`
+- `MICROSOFT_TOKEN_URL=https://login.microsoftonline.com/common/oauth2/v2.0/token`
+- `MICROSOFT_USER_INFO_URL=https://graph.microsoft.com/oidc/userinfo`
+- `MICROSOFT_SCOPE=openid profile email User.Read`
+
+#### X
+
+- `X_CLIENT_ID`
+- `X_CLIENT_SECRET`
+- `X_REDIRECT_URI`
+- `X_AUTHORIZE_URL`
+- `X_TOKEN_URL`
+- `X_USER_INFO_URL`
+- `X_SCOPE`
+
+默认推荐：
+
+- `X_AUTHORIZE_URL=https://x.com/i/oauth2/authorize`
+- `X_TOKEN_URL=https://api.x.com/2/oauth2/token`
+- `X_USER_INFO_URL=https://api.x.com/2/users/me`
+- `X_SCOPE=users.read tweet.read offline.access`
+
+### 13.2 代理域名清单
+
+若生产环境继续通过 AWS HTTP 代理访问外网，则代理放行域名必须至少包含：
+
+- `appleid.apple.com`
+- `login.microsoftonline.com`
+- `graph.microsoft.com`
+- `x.com`
+- `api.x.com`
+
+若代理域名未放行，即使登录页已显示 provider，也会在回调 token exchange 阶段失败。
+
+### 13.3 authenticate_provider 数据初始化顺序
+
+#### 第一步：初始化或重置 provider 基线
+
+执行：
+
+- `iterlife-idaas/database/20260429_01_provider_visibility_baseline.sql`
+
+执行结果应为：
+
+- `apple.enabled = 0`
+- `apple.visible = 0`
+- `microsoft.enabled = 0`
+- `microsoft.visible = 0`
+- `x.enabled = 0`
+- `x.visible = 0`
+
+#### 第二步：完成单个平台联调
+
+单个平台只有在以下条件同时满足后，才允许开启：
+
+- 后端环境变量已配置完整
+- 代理域名已放行
+- `/api/auth/providers` 返回 `available = true`
+- 授权地址可正常生成
+- 回调 token exchange 成功
+- userinfo 拉取成功
+
+#### 第三步：开启 provider
+
+执行：
+
+- `iterlife-idaas/database/20260429_02_provider_go_live.sql`
+
+按其中的单平台 SQL 逐个开启，不允许三家一次性全开。
+
+### 13.4 推荐上线顺序
+
+1. 先上线 `microsoft` 或 `apple`
+2. 验证生产日志与回调链路
+3. 再开启另一家
+4. `x` 最后上线
+
+原因：
+
+- `x` 的邮箱字段不稳定
+- `apple` 的返回字段天然较少
+- `microsoft` 最接近标准 OIDC，通常联调成本最低
