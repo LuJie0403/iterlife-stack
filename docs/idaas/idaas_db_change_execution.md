@@ -8,9 +8,10 @@
 
 - 仅保留 `user_account` 作为账号与认证来源的事实表
 - 不再保留 `authenticate_identity`
-- 为内部关联补齐 `account_uid`
-- 会话表 `authenticate_session` 改为通过 `account_uid` 关联账号
-- 对外业务唯一键收敛为 `provider_code + account_id`
+- 将旧 `account_uid` 收敛为新的内部 `account_id`
+- 将旧业务 `account_id` 重命名为 `account_name`
+- 会话表 `authenticate_session` 改为通过新的 `account_id` 关联账号
+- 对外业务唯一键收敛为 `provider_code + account_name`
 
 ## 1. 变更范围
 
@@ -25,8 +26,8 @@
 变更结果：
 
 - `user_account` 增加：
-  - `account_uid`
   - `provider_code`
+  - `account_name`
   - `provider_subject`
   - `provider_login`
   - `provider_display_name`
@@ -34,7 +35,7 @@
   - `profile_json`
   - `bound_at`
 - `authenticate_session` 增加：
-  - `account_uid`
+  - `account_name`
 - `authenticate_identity` 数据回填进 `user_account` 后删除
 
 ## 2. 脚本清单
@@ -186,32 +187,37 @@ SHOW TABLES LIKE 'authenticate_identity';
 预期：
 
 - `user_account` 存在以下关键列：
-  - `account_uid`
   - `provider_code`
   - `account_id`
+  - `account_name`
   - `provider_subject`
   - `provider_login`
-- `authenticate_session` 存在 `account_uid`
+- `authenticate_session` 存在 `account_id`
+- `authenticate_session` 存在 `account_name`
 - `authenticate_identity` 不再存在
 
 ### 6.2 关键数据校验
 
 ```sql
-SELECT COUNT(*) AS missing_account_uid
+SELECT COUNT(*) AS missing_account_id
 FROM user_account
-WHERE account_uid IS NULL OR account_uid = '';
+WHERE account_id IS NULL OR account_id = '';
 
 SELECT COUNT(*) AS missing_provider_code
 FROM user_account
 WHERE provider_code IS NULL OR provider_code = '';
 
+SELECT COUNT(*) AS missing_account_name
+FROM user_account
+WHERE account_name IS NULL OR account_name = '';
+
 SELECT COUNT(*) AS missing_provider_subject
 FROM user_account
 WHERE provider_subject IS NULL OR provider_subject = '';
 
-SELECT COUNT(*) AS missing_session_account_uid
+SELECT COUNT(*) AS missing_session_account_id
 FROM authenticate_session
-WHERE account_uid IS NULL OR account_uid = '';
+WHERE account_id IS NULL OR account_id = '';
 ```
 
 预期：
@@ -227,12 +233,12 @@ SHOW INDEX FROM authenticate_session;
 
 预期存在：
 
-- `uk_user_account_account_uid`
-- `uk_user_account_provider_account`
+- `uk_user_account_account_id`
+- `uk_user_account_provider_account_name`
 - `uk_user_account_provider_subject`
 - `uk_authenticate_session_session_id`
 - `uk_authenticate_session_x_token_hash`
-- `idx_authenticate_session_account_uid_client_status`
+- `idx_authenticate_session_account_id_client_status`
 
 ## 7. 应用侧联动检查
 
@@ -253,12 +259,12 @@ SHOW INDEX FROM authenticate_session;
 1. 历史一个账号对应多条有效 `authenticate_identity`
 当前脚本采用“按 `bound_at / created_at` 最新一条回填”的策略。
 
-2. 历史第三方账号的 `account_id`
-当前脚本不会强制把已有第三方账号的历史 `account_id` 改写成 `provider_login`，以避免影响旧会话和外部引用。
+2. 历史第三方账号的 `account_name`
+当前脚本会先把历史业务 `account_id` 平移到 `account_name`，再将旧 `account_uid` 收敛为新的内部 `account_id`。
 仅对新建账号执行“默认取 `provider_login`”规则。
 
-3. 历史会话回填 `account_uid`
-脚本会优先通过 `user_id + account_id + provider_code` 回填。如果历史数据本身已不一致，需人工核对。
+3. 历史会话回填内部 `account_id`
+脚本会优先通过 `user_id + account_name + provider_code` 回填。如果历史数据本身已不一致，需人工核对。
 
 ## 9. 回滚建议
 
@@ -272,6 +278,6 @@ SHOW INDEX FROM authenticate_session;
 
 - 本轮会删除 `authenticate_identity`
 - 会重建索引与唯一约束
-- 会给 `authenticate_session` 回填 `account_uid`
+- 会给 `authenticate_session` 回填新的内部 `account_id`
 
 因此更适合“备份恢复式回滚”，不适合临时手写反向 DDL。

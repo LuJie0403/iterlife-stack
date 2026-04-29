@@ -36,15 +36,21 @@
 
 - 账号是登录载体。
 - 一个账号只能属于一个用户。
-- 账号只保留 `account_id` 作为业务标识。
-- 账号模型不再包含额外的可登录名称字段。
+- `account_id` 是账号内部稳定标识，用于会话、内部关联和系统上下文。
+- `account_name` 是账号对外业务标识，默认初始化为第三方账号的 `provider_login`。
+- 对外唯一键收敛为：`provider_code + account_name`。
 
-### 2.3 第三方身份
+### 2.3 认证来源
 
-- 第三方身份是账号可使用的认证方式。
-- 一个账号可绑定多个第三方身份。
-- 每个第三方身份只能绑定到一个账号。
-- 唯一键为 `provider_code + provider_subject`。
+- 第三方认证来源直接并入 `user_account`。
+- 每个账号只保留一种认证来源。
+- 账号表直接存储：
+  - `provider_code`
+  - `provider_subject`
+  - `provider_login`
+  - `provider_email`
+  - `profile_json`
+- 认证稳定唯一键仍为 `provider_code + provider_subject`。
 
 ### 2.4 会话
 
@@ -118,7 +124,6 @@
 2. 若该身份不存在，则事务性创建：
    - `User`
    - `Account`
-   - `ThirdPartyIdentity`
    - `Session`
 3. 返回不透明 `X-Token`。
 
@@ -134,7 +139,7 @@
 2. 用户在用户中心发起第三方绑定。
 3. 若该第三方身份尚未被占用，则：
    - 在当前用户下新建一个账号
-   - 将该第三方身份绑定到新账号
+   - 在该账号记录中直接写入第三方来源信息
 4. 若该第三方身份已存在绑定关系，则绑定失败。
 
 ## 5. 用户中心范围
@@ -153,6 +158,8 @@
 
 - 后端统一使用 `X-Token`
 - 后端会话按 `account_id + client_type` 管理
+- 后端 `user_account.account_id` 表示内部稳定账号键
+- 后端 `user_account.account_name` 表示业务账号名
 - 前端 OAuth 回调直接完成登录或绑定结果承接
 - 前端用户中心直接展示已关联第三方账号
 - 前端会话页只操作当前账号及当前端会话
