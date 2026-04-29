@@ -74,7 +74,7 @@
 
 - 默认数据库：`iterlife_reunion`
 - 默认用户表：`user_account`
-- 统一认证相关基表：`user_account`、`authenticate_identity`、`authenticate_session`、`authenticate_client`、`authenticate_provider`
+- 统一认证相关基表：`user_account`、`authenticate_session`、`authenticate_client`、`authenticate_provider`
 - 默认明细表：`expenses_item`
 - 默认类型表：`expenses_type`
 - 前端透传 `X-Token`，后端通过调用 IDaaS 上下文接口获取当前用户与当前账号信息

@@ -7,6 +7,8 @@
 
 适用范围：`iterlife-idaas`、`iterlife-idaas-ui`、`iterlife-reunion`、`iterlife-expenses`
 
+数据库统一执行说明见：[idaas_db_change_execution.md](/Users/iter_1024/repository/iterlife-stack/docs/idaas/idaas_db_change_execution.md:1)
+
 ## 1. 系统定位
 
 `iterlife-idaas` / `iterlife-idaas-ui` 是 IterLife 的统一身份层，负责：
